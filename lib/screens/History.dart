@@ -14,6 +14,11 @@ class History extends StatelessWidget {
     HistoryCard(date: DateTime(2017, 9, 7)),
     HistoryCard(date: DateTime(2017, 9, 7)),
     HistoryCard(date: DateTime(2017, 9, 7)),
+    HistoryCard(date: DateTime(2017, 9, 7)),
+    HistoryCard(date: DateTime(2017, 9, 7)),
+    HistoryCard(date: DateTime(2017, 9, 7)),
+    HistoryCard(date: DateTime(2017, 9, 7)),
+    HistoryCard(date: DateTime(2017, 9, 7)),
   ];
 
   @override

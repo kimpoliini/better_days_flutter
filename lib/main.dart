@@ -16,6 +16,10 @@ class MainApp extends StatelessWidget {
   }
 }
 
+class AppState extends ChangeNotifier {
+  List<Widget> historyCards = <Widget>[];
+}
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -42,22 +46,21 @@ class _MainPageState extends State<MainPage> {
       return Scaffold(
         appBar: AppBar(centerTitle: true, title: const Text("Better days")),
         body: _mainPageScreens.elementAt(_selectedIndex),
-        bottomNavigationBar: BottomNavigationBar(
-          onTap: _onItemTapped,
-          selectedItemColor: Colors.blue,
-          currentIndex: _selectedIndex,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
+        bottomNavigationBar: NavigationBar(
+          onDestinationSelected: _onItemTapped,
+          selectedIndex: _selectedIndex,
+          destinations: const <NavigationDestination>[
+            NavigationDestination(
                 icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
+                selectedIcon: Icon(Icons.home),
                 label: "Home"),
-            BottomNavigationBarItem(
+            NavigationDestination(
                 icon: Icon(Icons.history_outlined),
-                activeIcon: Icon(Icons.history),
+                selectedIcon: Icon(Icons.history),
                 label: "History"),
-            BottomNavigationBarItem(
+            NavigationDestination(
                 icon: Icon(Icons.person_outlined),
-                activeIcon: Icon(Icons.person),
+                selectedIcon: Icon(Icons.person),
                 label: "Profile"),
           ],
         ),
