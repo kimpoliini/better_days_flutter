@@ -44,13 +44,21 @@ class _MainPageState extends State<MainPage> {
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: BottomNavigationBar(
           onTap: _onItemTapped,
-          selectedItemColor: Colors.amber,
+          selectedItemColor: Colors.blue,
           currentIndex: _selectedIndex,
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.history), label: "History"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: "Home"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.history_outlined),
+                activeIcon: Icon(Icons.history),
+                label: "History"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.person_outlined),
+                activeIcon: Icon(Icons.person),
+                label: "Profile"),
           ],
         ),
       );

@@ -1,4 +1,3 @@
-import 'package:better_days_flutter/main.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatelessWidget {
