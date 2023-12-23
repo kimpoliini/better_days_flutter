@@ -1,11 +1,13 @@
+import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class HistoryCard extends StatelessWidget {
-  const HistoryCard({super.key, required this.date, this.description});
+  const HistoryCard({super.key, required this.entry});
 
-  final DateTime date;
-  final String? description;
+  final HistoryEntry entry;
+
+  final headerStyle = const TextStyle(fontSize: 18);
 
   @override
   Widget build(BuildContext context) {
@@ -14,15 +16,24 @@ class HistoryCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            DateFormat.MMMMEEEEd().format(date),
-            style: const TextStyle(fontSize: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                DateFormat.MMMMEEEEd().format(entry.date),
+                style: headerStyle,
+              ),
+              Text(
+                entry.score?.toString() ?? "--",
+                style: headerStyle,
+              )
+            ],
           ),
           const SizedBox(
             height: 8,
           ),
           Text(
-            description ?? "No description.",
+            entry.description ?? "No description.",
           )
         ]),
       ),
