@@ -1,8 +1,8 @@
 import 'package:better_days_flutter/models/history_entry.dart';
-import 'package:better_days_flutter/screens/History.dart';
-import 'package:better_days_flutter/screens/Profile.dart';
+import 'package:better_days_flutter/screens/history.dart';
+import 'package:better_days_flutter/screens/profile.dart';
 import 'package:flutter/material.dart';
-import 'screens/Home.dart';
+import 'screens/home.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -28,8 +28,15 @@ class MainApp extends StatelessWidget {
 }
 
 class AppState extends ChangeNotifier {
-  var historyEntries = <HistoryEntry>[];
-  var historyCards = <Widget>[];
+  var historyEntries = <HistoryEntry>[
+    for (int i = 0; i < 20; i++) HistoryEntry(date: DateTime(2017, 9, 7))
+  ];
+  // var historyCards = <Widget>[];
+
+  void addEntry(HistoryEntry entry) {
+    historyEntries.add(entry);
+    notifyListeners();
+  }
 }
 
 class MainPage extends StatefulWidget {
@@ -56,12 +63,14 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     var state = context.watch<AppState>();
 
-    state.historyEntries = <HistoryEntry>[
-      for (int i = 0; i < 20; i++) HistoryEntry(date: DateTime(2017, 9, 7))
-    ];
-
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
+        floatingActionButton: _selectedIndex == 1
+            ? FloatingActionButton(
+                child: const Icon(Icons.add),
+                onPressed: () =>
+                    state.addEntry(HistoryEntry(date: DateTime(2023, 12, 23))))
+            : null,
         appBar: AppBar(centerTitle: true, title: const Text("Better days")),
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBar(

@@ -1,19 +1,21 @@
-import 'package:better_days_flutter/models/history_entry.dart';
-import 'package:better_days_flutter/widgets/HistoryCard.dart';
+import 'package:better_days_flutter/main.dart';
+import 'package:better_days_flutter/widgets/history_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class History extends StatelessWidget {
   const History({super.key});
 
-  static final List<Widget> _testHistoryEntries = <Widget>[
-    for (int i = 0; i < 20; i++)
-      HistoryCard(entry: HistoryEntry(date: DateTime(2017, 9, 7)))
-  ];
-
   @override
   Widget build(BuildContext context) {
+    var state = context.watch<AppState>();
+
+    final List<Widget> testHistoryEntries = <Widget>[
+      for (var entry in state.historyEntries) HistoryCard(entry: entry)
+    ];
+
     return ListView(
-      children: _testHistoryEntries,
+      children: testHistoryEntries,
     );
   }
 }
