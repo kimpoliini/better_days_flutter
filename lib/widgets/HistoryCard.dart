@@ -9,8 +9,10 @@ class HistoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child:
-          Column(children: [Text(date.toIso8601String()), Text(description!)]),
+      child: Column(children: [
+        Text(date.toIso8601String()),
+        Text(description ?? "No description.")
+      ]),
     );
   }
 }

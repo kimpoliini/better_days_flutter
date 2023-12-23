@@ -18,8 +18,8 @@ class History extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [],
+    return ListView(
+      children: _testHistoryEntries,
     );
   }
 }
