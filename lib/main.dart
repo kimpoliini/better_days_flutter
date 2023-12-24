@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/history.dart';
 import 'package:better_days_flutter/screens/profile.dart';
@@ -21,17 +23,22 @@ class MainApp extends StatelessWidget {
         home: const MainPage(),
         theme: ThemeData(
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue)),
+            colorScheme:
+                ColorScheme.fromSeed(seedColor: Colors.green.shade200)),
       ),
     );
   }
 }
 
 class AppState extends ChangeNotifier {
+  //Mock initialize history entries
   var historyEntries = <HistoryEntry>[
-    for (int i = 0; i < 20; i++) HistoryEntry(date: DateTime(2017, 9, 7))
+    for (int i = 0; i < 20; i++)
+      HistoryEntry(
+          date: DateTime.now().subtract(Duration(days: i)),
+          score:
+              double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];
-  // var historyCards = <Widget>[];
 
   void addEntry(HistoryEntry entry) {
     historyEntries.add(entry);
@@ -76,6 +83,7 @@ class _MainPageState extends State<MainPage> {
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: _onItemTapped,
           selectedIndex: _selectedIndex,
+          indicatorColor: Colors.green.shade200,
           destinations: const <NavigationDestination>[
             NavigationDestination(
                 icon: Icon(Icons.home_outlined),
