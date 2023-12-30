@@ -24,6 +24,9 @@ class Home extends StatelessWidget {
       child: ListView(
         children: [
           const MainGraphCard(),
+          const SizedBox(
+            height: 8,
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -34,14 +37,14 @@ class Home extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
-                      text: "Evaluate this day",
+                      text: "Evaluate your day",
                       icon: Icons.keyboard_arrow_right,
                       onTap: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const EvaluateDay(
-                                      mode: Mode.today,
+                                      mode: DayMode.today,
                                     )));
                       },
                     ),
@@ -58,14 +61,13 @@ class Home extends StatelessWidget {
                     child: EvaluateDayButton(
                       text: "Evaluate other day",
                       icon: Icons.keyboard_arrow_right,
-                      color: Colors.amber,
                       filled: false,
                       onTap: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const EvaluateDay(mode: Mode.otherDay)));
+                                    const EvaluateDay(mode: DayMode.otherDay)));
                       },
                     ),
                   ),
@@ -199,9 +201,9 @@ class EvaluateDayButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: filled
-          ? null
-          : RoundedRectangleBorder(
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ? StadiumBorder(side: BorderSide(color: Colors.green.shade200))
+          : StadiumBorder(
+              // borderRadius: const BorderRadius.all(Radius.circular(12)),
               side:
                   BorderSide(color: color ?? Colors.green.shade200, width: 3)),
       elevation: filled ? 1 : 0,
@@ -211,7 +213,8 @@ class EvaluateDayButton extends StatelessWidget {
         highlightColor: color != null
             ? color!.withOpacity(0.25)
             : Colors.green.shade300.withOpacity(0.25),
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderRadius: const BorderRadius.all(Radius.circular(
+            32)), //12 for RoundedRectangleBorder, 32 for StadiumBorder
         onTap: onTap ?? () => log("not implemented"),
         child: Padding(
           padding: const EdgeInsets.only(
@@ -228,12 +231,13 @@ class EvaluateDayButton extends StatelessWidget {
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: filled ? Colors.white : color ?? Colors.black),
+                    color:
+                        filled ? Colors.white : color ?? Colors.green.shade200),
               ),
               Icon(
                 icon,
                 size: 32,
-                color: filled ? Colors.white : color ?? Colors.black,
+                color: filled ? Colors.white : color ?? Colors.green.shade200,
               ),
             ],
           ),
