@@ -1,4 +1,4 @@
-import 'dart:ffi';
+import 'dart:developer';
 
 import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
@@ -7,16 +7,57 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+class ChartData {
+  ChartData(this.x, this.y);
+  final int x;
+  final double? y;
+}
+
 class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Column(
-        children: [
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ListView(
+        children: const [
           MainGraphCard(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(child: SizedBox()),
+                  Expanded(
+                    flex: 3,
+                    child: EvaluateDayButton(
+                      text: "Evaluate this day",
+                      icon: Icons.keyboard_arrow_right,
+                    ),
+                  ),
+                  Expanded(child: SizedBox()),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(child: SizedBox()),
+                  Expanded(
+                    flex: 3,
+                    child: EvaluateDayButton(
+                      text: "Evaluate other day",
+                      icon: Icons.keyboard_arrow_right,
+                      color: Colors.amber,
+                      filled: false,
+                    ),
+                  ),
+                  Expanded(child: SizedBox()),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -38,7 +79,7 @@ class MainGraphCard extends StatelessWidget {
             SizedBox(
               height: 16,
             ),
-            PastWeekChart()
+            PastWeekChart(),
           ],
         ),
       ),
@@ -54,13 +95,7 @@ class PastWeekChart extends StatelessWidget {
     var entries = context.watch<AppState>().historyEntries;
     var thisWeekEntries = entries.getRange(0, 7).toList().reversed.toList();
 
-    //Checks if entries are from the past week
-    // final date = e.date;
-    // var isThisWeek = DateTime.now().subtract(const Duration(days: 7)).isBefore(e.date);
-
     List<ChartData> data = <ChartData>[];
-
-    // data.add(ChartData(0, 5));
 
     for (var i = 0; i < 7; i++) {
       var date =
@@ -129,8 +164,61 @@ ChartAxisLabel axis(AxisLabelRenderDetails details) {
   return ChartAxisLabel(day.substring(0, 3), dayStyle);
 }
 
-class ChartData {
-  ChartData(this.x, this.y);
-  final int x;
-  final double? y;
+class EvaluateDayButton extends StatelessWidget {
+  const EvaluateDayButton(
+      {super.key, this.text = "", this.icon, this.color, this.filled = true});
+
+  final String text;
+  final IconData? icon;
+  final Color? color;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: filled
+          ? null
+          : RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              side:
+                  BorderSide(color: color ?? Colors.green.shade200, width: 3)),
+      elevation: filled ? 1 : 0,
+      color: filled ? color ?? Colors.green.shade200 : Colors.transparent,
+      child: InkWell(
+        splashColor: color != null ? color : Colors.green.shade300,
+        highlightColor: color != null
+            ? color!.withOpacity(0.25)
+            : Colors.green.shade300.withOpacity(0.25),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        onTap: () {
+          log("tap");
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(
+            top: 16.0,
+            right: 8.0,
+            left: 16.0,
+            bottom: 16.0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                text,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: filled ? Colors.white : color ?? Colors.black),
+              ),
+              Icon(
+                icon,
+                size: 32,
+                color: filled ? Colors.white : color ?? Colors.black,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
