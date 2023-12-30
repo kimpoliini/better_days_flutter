@@ -76,19 +76,19 @@ class PastWeekChart extends StatelessWidget {
     return SfCartesianChart(
       series: <CartesianSeries>[
         SplineAreaSeries<ChartData, int>(
-            animationDuration: 2000,
-            emptyPointSettings: EmptyPointSettings(
-              mode: EmptyPointMode.average,
-              color: Colors.grey.shade500,
-              borderColor: Colors.green.shade200,
-              borderWidth: 4,
-            ),
+            animationDuration: 500,
             markerSettings: MarkerSettings(
                 borderWidth: 0,
                 height: 18,
                 width: 18,
                 color: Colors.green.shade200,
                 isVisible: true),
+            emptyPointSettings: EmptyPointSettings(
+              mode: EmptyPointMode.average,
+              color: Colors.grey.shade500,
+              borderColor: Colors.green.shade200,
+              borderWidth: 4,
+            ),
             color: Colors.transparent,
             borderColor: Colors.green.shade200,
             borderWidth: 10,
