@@ -114,9 +114,19 @@ class PastWeekChart extends StatelessWidget {
 }
 
 ChartAxisLabel axis(AxisLabelRenderDetails details) {
-  var weekdays = <String>["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  return ChartAxisLabel(
-      weekdays[int.parse(details.text) - 1], details.textStyle);
+  var today = DateFormat.EEEE().format(DateTime.now());
+  var value = int.parse(details.text);
+  var day = DateFormat.EEEE()
+      .format(DateTime.now().subtract(Duration(days: 7 - value)));
+
+  var dayStyle = day == today
+      ? const TextStyle(
+          decoration: TextDecoration.underline,
+          decorationThickness: 2,
+          decorationStyle: TextDecorationStyle.dotted)
+      : details.textStyle;
+
+  return ChartAxisLabel(day.substring(0, 3), dayStyle);
 }
 
 class ChartData {
