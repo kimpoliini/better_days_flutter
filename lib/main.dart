@@ -22,6 +22,12 @@ class MainApp extends StatelessWidget {
         title: "Better days",
         home: const MainPage(),
         theme: ThemeData(
+            //Fixes InkWell being stuck in a highlighted state when navigating
+            pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: ZoomPageTransitionsBuilder(
+                      allowEnterRouteSnapshotting: false)
+                }),
             useMaterial3: true,
             colorScheme:
                 ColorScheme.fromSeed(seedColor: Colors.green.shade200)),

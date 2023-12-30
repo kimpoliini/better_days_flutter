@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
+import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -21,29 +22,37 @@ class Home extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListView(
-        children: const [
-          MainGraphCard(),
+        children: [
+          const MainGraphCard(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(child: SizedBox()),
+                  const Expanded(child: SizedBox()),
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
                       text: "Evaluate this day",
                       icon: Icons.keyboard_arrow_right,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const EvaluateDay(
+                                      mode: Mode.today,
+                                    )));
+                      },
                     ),
                   ),
-                  Expanded(child: SizedBox()),
+                  const Expanded(child: SizedBox()),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(child: SizedBox()),
+                  const Expanded(child: SizedBox()),
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
@@ -51,9 +60,16 @@ class Home extends StatelessWidget {
                       icon: Icons.keyboard_arrow_right,
                       color: Colors.amber,
                       filled: false,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const EvaluateDay(mode: Mode.otherDay)));
+                      },
                     ),
                   ),
-                  Expanded(child: SizedBox()),
+                  const Expanded(child: SizedBox()),
                 ],
               ),
             ],
@@ -166,12 +182,18 @@ ChartAxisLabel axis(AxisLabelRenderDetails details) {
 
 class EvaluateDayButton extends StatelessWidget {
   const EvaluateDayButton(
-      {super.key, this.text = "", this.icon, this.color, this.filled = true});
+      {super.key,
+      this.text = "",
+      this.icon,
+      this.color,
+      this.filled = true,
+      this.onTap});
 
   final String text;
   final IconData? icon;
   final Color? color;
   final bool filled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -179,20 +201,18 @@ class EvaluateDayButton extends StatelessWidget {
       shape: filled
           ? null
           : RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderRadius: const BorderRadius.all(Radius.circular(12)),
               side:
                   BorderSide(color: color ?? Colors.green.shade200, width: 3)),
       elevation: filled ? 1 : 0,
       color: filled ? color ?? Colors.green.shade200 : Colors.transparent,
       child: InkWell(
-        splashColor: color != null ? color : Colors.green.shade300,
+        splashColor: color ?? Colors.green.shade300,
         highlightColor: color != null
             ? color!.withOpacity(0.25)
             : Colors.green.shade300.withOpacity(0.25),
         borderRadius: const BorderRadius.all(Radius.circular(12)),
-        onTap: () {
-          log("tap");
-        },
+        onTap: onTap ?? () => log("not implemented"),
         child: Padding(
           padding: const EdgeInsets.only(
             top: 16.0,
