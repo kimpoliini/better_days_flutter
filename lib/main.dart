@@ -35,7 +35,7 @@ class AppState extends ChangeNotifier {
   var historyEntries = <HistoryEntry>[
     for (int i = 0; i < 20; i++)
       HistoryEntry(
-          date: DateTime.now().subtract(Duration(days: i)),
+          date: DateTime.now().subtract(Duration(days: (i + 1) * 2)),
           score:
               double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];
