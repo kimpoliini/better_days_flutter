@@ -1,6 +1,11 @@
+import 'dart:developer';
+
+import 'package:better_days_flutter/main.dart';
+import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 enum DayMode { today, otherDay }
 
@@ -16,6 +21,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
   bool isSimpleMode = true;
   DateTime? selectedDate;
   double currentSliderValue = 5;
+  String note = "";
 
   void _toggleMode() {
     setState(() {
@@ -36,6 +42,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
     bool isToday = widget.mode == DayMode.today;
     if (isToday) _setDate(DateTime.now());
 
+    var appState = context.watch<AppState>();
+
     return Scaffold(
       appBar: AppBar(title: Text(modeText)),
       bottomNavigationBar: Padding(
@@ -44,7 +52,15 @@ class _EvaluateDayState extends State<EvaluateDay> {
             color: selectedDate != null ? null : Colors.grey,
             text: "Done",
             icon: Icons.check,
-            onTap: selectedDate != null ? () => Navigator.pop(context) : null),
+            onTap: selectedDate != null
+                ? () {
+                    appState.addEntry(HistoryEntry(
+                        date: selectedDate!,
+                        description: note,
+                        score: currentSliderValue));
+                    Navigator.pop(context);
+                  }
+                : null),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -123,26 +139,29 @@ class _EvaluateDayState extends State<EvaluateDay> {
                 ),
               ),
             ),
-            const Card(
+            Card(
               child: Padding(
-                padding: EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(12.0),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Write a note about today (optional)"),
-                      SizedBox(
+                      const Text("Write a note about today (optional)"),
+                      const SizedBox(
                         height: 16,
                       ),
                       TextField(
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
                         autocorrect: true,
                         maxLines: 4,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                             labelStyle: TextStyle(color: Colors.grey),
                             floatingLabelStyle: TextStyle(),
                             contentPadding: EdgeInsets.all(12.0),
                             alignLabelWithHint: true,
                             border: OutlineInputBorder(),
                             labelText: "How was your day?"),
+                        onChanged: (value) => note = value,
                       )
                     ]),
               ),
