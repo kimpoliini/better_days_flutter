@@ -14,6 +14,7 @@ class EvaluateDay extends StatefulWidget {
 class _EvaluateDayState extends State<EvaluateDay> {
   bool isSimpleMode = true;
   DateTime? selectedDate;
+  double currentSliderValue = 5;
 
   void _toggleMode() {
     setState(() {
@@ -68,6 +69,31 @@ class _EvaluateDayState extends State<EvaluateDay> {
                 ),
               ],
             ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Choose a score for today"),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Slider(
+                        activeColor: Colors.green.shade200,
+                        thumbColor: Colors.green.shade200,
+                        label: currentSliderValue.round().toString(),
+                        min: 1,
+                        max: 10,
+                        divisions: 9,
+                        value: currentSliderValue,
+                        onChanged: ((double value) => setState(() {
+                              currentSliderValue = value;
+                            })))
+                  ],
+                ),
+              ),
+            )
           ],
         ),
       ),
