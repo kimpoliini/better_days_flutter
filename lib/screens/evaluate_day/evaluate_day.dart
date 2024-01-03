@@ -37,28 +37,51 @@ class _EvaluateDayState extends State<EvaluateDay> {
           children: [
             Row(
               children: [
-                Card(
-                  child: InkWell(
-                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                    onTap: () => _toggleMode(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.swap_horiz),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          Text(isSimpleMode ? "Simple" : "Advanced"),
-                        ],
-                      ),
-                    ),
-                  ),
+                SimpleButton(
+                  text: isSimpleMode ? "Simple" : "Advanced",
+                  icon: Icons.swap_horiz,
+                  onTap: _toggleMode,
                 ),
-                Expanded(child: SizedBox())
+                SimpleButton(
+                  text: "Choose date",
+                  icon: Icons.calendar_month,
+                ),
               ],
-            )
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class SimpleButton extends StatelessWidget {
+  SimpleButton({super.key, this.text, this.onTap, this.icon});
+
+  String? text;
+  VoidCallback? onTap;
+  IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Card(
+        child: InkWell(
+          borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+          onTap: onTap ?? () {},
+          child: Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon),
+                const SizedBox(
+                  width: 8,
+                ),
+                Text(text ?? ""),
+              ],
+            ),
+          ),
         ),
       ),
     );
