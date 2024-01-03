@@ -1,3 +1,4 @@
+import 'package:better_days_flutter/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -37,6 +38,14 @@ class _EvaluateDayState extends State<EvaluateDay> {
 
     return Scaffold(
       appBar: AppBar(title: Text(modeText)),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: EvaluateDayButton(
+            color: selectedDate != null ? null : Colors.grey,
+            text: "Done",
+            icon: Icons.check,
+            onTap: selectedDate != null ? () => Navigator.pop(context) : null),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
@@ -137,7 +146,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                       )
                     ]),
               ),
-            )
+            ),
           ],
         ),
       ),

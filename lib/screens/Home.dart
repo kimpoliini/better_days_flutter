@@ -201,7 +201,8 @@ class EvaluateDayButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: filled
-          ? StadiumBorder(side: BorderSide(color: Colors.green.shade200))
+          ? StadiumBorder(
+              side: BorderSide(color: color ?? Colors.green.shade200))
           : StadiumBorder(
               // borderRadius: const BorderRadius.all(Radius.circular(12)),
               side:
@@ -215,7 +216,7 @@ class EvaluateDayButton extends StatelessWidget {
             : Colors.green.shade300.withOpacity(0.25),
         borderRadius: const BorderRadius.all(Radius.circular(
             32)), //12 for RoundedRectangleBorder, 32 for StadiumBorder
-        onTap: onTap ?? () => log("not implemented"),
+        onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.only(
             top: 16.0,
