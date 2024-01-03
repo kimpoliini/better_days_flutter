@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 enum DayMode { today, otherDay }
@@ -17,10 +20,17 @@ class EvaluateDay extends StatefulWidget {
 
 class _EvaluateDayState extends State<EvaluateDay> {
   bool isSimpleMode = true;
+  DateTime? selectedDate;
 
   void _toggleMode() {
     setState(() {
       isSimpleMode = !isSimpleMode;
+    });
+  }
+
+  void _setDate(date) {
+    setState(() {
+      selectedDate = date;
     });
   }
 
@@ -43,8 +53,17 @@ class _EvaluateDayState extends State<EvaluateDay> {
                   onTap: _toggleMode,
                 ),
                 SimpleButton(
-                  text: "Choose date",
+                  text: selectedDate != null
+                      ? DateFormat.yMMMEd().format(selectedDate!)
+                      : "Choose date",
                   icon: Icons.calendar_month,
+                  onTap: () async {
+                    var selected = await showDatePicker(
+                        context: context,
+                        firstDate: DateTime(2000, 1),
+                        lastDate: DateTime.now());
+                    if (selected != null) _setDate(selected);
+                  },
                 ),
               ],
             ),
