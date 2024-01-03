@@ -1,14 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 enum DayMode { today, otherDay }
-
-// class EvaluationModeState extends ChangeNotifier {
-
-// }
 
 class EvaluateDay extends StatefulWidget {
   const EvaluateDay({super.key, this.mode = DayMode.today});
@@ -37,7 +30,9 @@ class _EvaluateDayState extends State<EvaluateDay> {
   @override
   Widget build(BuildContext context) {
     String modeText =
-        widget.mode == DayMode.today ? "Evaluate your day" : "Evaluate day";
+        widget.mode == DayMode.today ? "Evaluate today" : "Evaluate day";
+    bool isToday = widget.mode == DayMode.today;
+    if (isToday) _setDate(DateTime.now());
 
     return Scaffold(
       appBar: AppBar(title: Text(modeText)),
@@ -53,17 +48,23 @@ class _EvaluateDayState extends State<EvaluateDay> {
                   onTap: _toggleMode,
                 ),
                 SimpleButton(
-                  text: selectedDate != null
-                      ? DateFormat.yMMMEd().format(selectedDate!)
-                      : "Choose date",
+                  enabled: !isToday,
+                  text: isToday
+                      ? "Evaluating today"
+                      : selectedDate != null
+                          ? DateFormat.yMMMEd().format(selectedDate!)
+                          : "Choose date",
                   icon: Icons.calendar_month,
-                  onTap: () async {
-                    var selected = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(2000, 1),
-                        lastDate: DateTime.now());
-                    if (selected != null) _setDate(selected);
-                  },
+                  onTap: isToday
+                      ? null
+                      : () async {
+                          var selected = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(2000, 1),
+                              lastDate: DateTime.now()
+                                  .subtract(const Duration(days: 1)));
+                          if (selected != null) _setDate(selected);
+                        },
                 ),
               ],
             ),
@@ -75,11 +76,13 @@ class _EvaluateDayState extends State<EvaluateDay> {
 }
 
 class SimpleButton extends StatelessWidget {
-  SimpleButton({super.key, this.text, this.onTap, this.icon});
+  const SimpleButton(
+      {super.key, this.text, this.onTap, this.icon, this.enabled = true});
 
-  String? text;
-  VoidCallback? onTap;
-  IconData? icon;
+  final String? text;
+  final VoidCallback? onTap;
+  final IconData? icon;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -87,17 +90,20 @@ class SimpleButton extends StatelessWidget {
       child: Card(
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-          onTap: onTap ?? () {},
+          onTap: onTap,
           child: Padding(
-            padding: EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(12.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon),
+                Icon(icon, color: enabled ? Colors.black : Colors.grey),
                 const SizedBox(
                   width: 8,
                 ),
-                Text(text ?? ""),
+                Text(
+                  text ?? "",
+                  style: TextStyle(color: enabled ? Colors.black : Colors.grey),
+                ),
               ],
             ),
           ),
