@@ -75,23 +75,67 @@ class _EvaluateDayState extends State<EvaluateDay> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Choose a score for today"),
+                    Text(isSimpleMode
+                        ? "Choose a score for today"
+                        : "Select which part of the day had the most impact, either good or bad"),
                     const SizedBox(
                       height: 8,
                     ),
-                    Slider(
-                        activeColor: Colors.green.shade200,
-                        thumbColor: Colors.green.shade200,
-                        label: currentSliderValue.round().toString(),
-                        min: 1,
-                        max: 10,
-                        divisions: 9,
-                        value: currentSliderValue,
-                        onChanged: ((double value) => setState(() {
-                              currentSliderValue = value;
-                            })))
+                    isSimpleMode
+                        ? Column(
+                            children: [
+                              Slider(
+                                  activeColor: Colors.green.shade200,
+                                  thumbColor: Colors.green.shade200,
+                                  label: currentSliderValue.round().toString(),
+                                  min: 0,
+                                  max: 10,
+                                  divisions: 10,
+                                  value: currentSliderValue,
+                                  onChanged: ((double value) => setState(() {
+                                        currentSliderValue = value;
+                                      }))),
+                              const SizedBox(
+                                height: 4,
+                              ),
+                              const Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Bad"),
+                                  Text("Decent"),
+                                  Text("Great"),
+                                ],
+                              ),
+                            ],
+                          )
+                        : const Text("TODO Advanced mode")
                   ],
                 ),
+              ),
+            ),
+            const Card(
+              child: Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Write a note about today (optional)"),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      TextField(
+                        autocorrect: true,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                            labelStyle: TextStyle(color: Colors.grey),
+                            floatingLabelStyle: TextStyle(),
+                            contentPadding: EdgeInsets.all(12.0),
+                            alignLabelWithHint: true,
+                            border: OutlineInputBorder(),
+                            labelText: "How was your day?"),
+                      )
+                    ]),
               ),
             )
           ],
