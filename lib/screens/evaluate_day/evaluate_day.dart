@@ -56,7 +56,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                 ? () {
                     appState.addEntry(HistoryEntry(
                         date: selectedDate!,
-                        description: note,
+                        description: note.isEmpty ? null : note,
                         score: currentSliderValue));
                     Navigator.pop(context);
                   }
