@@ -52,6 +52,10 @@ class AppState extends ChangeNotifier {
     historyEntries.sort((a, b) => b.date.compareTo(a.date));
     notifyListeners();
   }
+
+  void removeEntry(HistoryEntry entry) {
+    if (historyEntries.contains(entry)) historyEntries.remove(entry);
+  }
 }
 
 class MainPage extends StatefulWidget {
