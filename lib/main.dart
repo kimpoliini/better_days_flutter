@@ -48,6 +48,8 @@ class AppState extends ChangeNotifier {
 
   void addEntry(HistoryEntry entry) {
     historyEntries.add(entry);
+
+    historyEntries.sort((a, b) => b.date.compareTo(a.date));
     notifyListeners();
   }
 }

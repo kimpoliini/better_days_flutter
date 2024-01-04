@@ -116,8 +116,8 @@ class PastWeekChart extends StatelessWidget {
     List<ChartData> data = <ChartData>[];
 
     for (var i = 0; i < 7; i++) {
-      var date =
-          DateFormat.yMd().format(DateTime.now().subtract(Duration(days: i)));
+      var date = DateFormat.yMd()
+          .format(DateTime.now().subtract(Duration(days: 6 - i)));
 
       HistoryEntry? what = thisWeekEntries
           .where((e) => DateFormat.yMd().format(e.date) == date)
@@ -128,8 +128,9 @@ class PastWeekChart extends StatelessWidget {
 
     return SfCartesianChart(
       series: <CartesianSeries>[
-        SplineAreaSeries<ChartData, int>(
+        SplineSeries<ChartData, int>(
             animationDuration: 500,
+            splineType: SplineType.monotonic,
             markerSettings: MarkerSettings(
                 borderWidth: 0,
                 height: 18,
@@ -142,16 +143,15 @@ class PastWeekChart extends StatelessWidget {
               borderColor: Colors.green.shade200,
               borderWidth: 4,
             ),
-            color: Colors.transparent,
-            borderColor: Colors.green.shade200,
-            borderWidth: 10,
+            color: Colors.green.shade200,
+            width: 10,
             dataSource: data,
             xValueMapper: (ChartData data, _) => data.x,
             yValueMapper: (ChartData data, _) => data.y),
       ],
       primaryXAxis: CategoryAxis(
           interval: 1,
-          maximum: 6,
+          maximum: 6.33,
           minimum: 0,
           plotOffset: 16,
           axisLabelFormatter: (AxisLabelRenderDetails details) => axis(details),
@@ -159,7 +159,7 @@ class PastWeekChart extends StatelessWidget {
       primaryYAxis: NumericAxis(
         plotOffset: 16,
         minimum: 0,
-        maximum: 10,
+        maximum: 10.5,
         interval: 2,
       ),
     );
