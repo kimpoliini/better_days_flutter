@@ -19,6 +19,10 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var state = context.watch<AppState>();
+    var hasEvaluatedToday = DateFormat.yMd().format(DateTime.now()) ==
+        DateFormat.yMd().format(state.historyEntries.first.date);
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListView(
@@ -37,8 +41,12 @@ class Home extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
-                      text: "Evaluate your day",
-                      icon: Icons.keyboard_arrow_right,
+                      filled: !hasEvaluatedToday,
+                      text: hasEvaluatedToday
+                          ? "You have evaluated this day! 🎉"
+                          : "Evaluate your day",
+                      icon:
+                          hasEvaluatedToday ? null : Icons.keyboard_arrow_right,
                       onTap: () {
                         Navigator.push(
                             context,
@@ -204,7 +212,6 @@ class EvaluateDayButton extends StatelessWidget {
           ? StadiumBorder(
               side: BorderSide(color: color ?? Colors.green.shade200))
           : StadiumBorder(
-              // borderRadius: const BorderRadius.all(Radius.circular(12)),
               side:
                   BorderSide(color: color ?? Colors.green.shade200, width: 3)),
       elevation: filled ? 1 : 0,
@@ -214,32 +221,35 @@ class EvaluateDayButton extends StatelessWidget {
         highlightColor: color != null
             ? color!.withOpacity(0.25)
             : Colors.green.shade300.withOpacity(0.25),
-        borderRadius: const BorderRadius.all(Radius.circular(
-            32)), //12 for RoundedRectangleBorder, 32 for StadiumBorder
+        customBorder: const StadiumBorder(),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             top: 16.0,
-            right: 8.0,
-            left: 16.0,
+            right: icon != null ? 12.0 : 24.0,
+            left: 24.0,
             bottom: 16.0,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                text,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color:
-                        filled ? Colors.white : color ?? Colors.green.shade200),
+              Flexible(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: filled
+                          ? Colors.white
+                          : color ?? Colors.green.shade200),
+                ),
               ),
-              Icon(
-                icon,
-                size: 32,
-                color: filled ? Colors.white : color ?? Colors.green.shade200,
-              ),
+              if (icon != null)
+                Icon(
+                  icon,
+                  size: 32,
+                  color: filled ? Colors.white : color ?? Colors.green.shade200,
+                ),
             ],
           ),
         ),
