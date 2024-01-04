@@ -6,8 +6,15 @@ import 'package:better_days_flutter/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 enum DayMode { today, otherDay }
+
+class DayScoreEntry {
+  DayScoreEntry(this.x, this.y);
+  final int x;
+  final double y;
+}
 
 class EvaluateDay extends StatefulWidget {
   const EvaluateDay({super.key, this.mode = DayMode.today});
@@ -18,10 +25,15 @@ class EvaluateDay extends StatefulWidget {
 }
 
 class _EvaluateDayState extends State<EvaluateDay> {
+  ChartSeriesController? seriesController;
   bool isSimpleMode = true;
   DateTime? selectedDate;
   double currentSliderValue = 5;
   String note = "";
+  List<DayScoreEntry> data = <DayScoreEntry>[
+    DayScoreEntry(0, 5),
+    DayScoreEntry(24, 5),
+  ];
 
   void _toggleMode() {
     setState(() {
@@ -32,6 +44,16 @@ class _EvaluateDayState extends State<EvaluateDay> {
   void _setDate(date) {
     setState(() {
       selectedDate = date;
+    });
+  }
+
+  void _addPoint(DayScoreEntry entry) {
+    setState(() {
+      data.add(entry);
+
+      data.sort(
+        (a, b) => a.x.compareTo(b.x),
+      );
     });
   }
 
@@ -108,6 +130,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                     ),
                     isSimpleMode
                         ? Column(
+                            //Simple mode
                             children: [
                               Slider(
                                   activeColor: Colors.green.shade200,
@@ -134,7 +157,63 @@ class _EvaluateDayState extends State<EvaluateDay> {
                               ),
                             ],
                           )
-                        : const Text("TODO Advanced mode")
+                        : Column(children: [
+                            Row(children: [
+                              Text(
+                                  "About what time did you wake up ${isToday ? "today" : "this day"}?"),
+                              const Text("10"),
+                            ]),
+                            const SizedBox(height: 16.0),
+                            SfCartesianChart(
+                                onChartTouchInteractionUp: (tapArgs) {
+                                  final Offset value = Offset(
+                                      tapArgs.position.dx, tapArgs.position.dy);
+
+                                  final CartesianChartPoint<dynamic>
+                                      chartPoint =
+                                      seriesController!.pixelToPoint(value);
+
+                                  var x = chartPoint.x as double;
+                                  double y = chartPoint.y;
+                                  _addPoint(DayScoreEntry(x.toInt(), y));
+                                  log("$x, $y");
+                                },
+                                series: <CartesianSeries>[
+                                  SplineAreaSeries<DayScoreEntry, int>(
+                                      splineType: SplineType.monotonic,
+                                      onRendererCreated: (controller) {
+                                        seriesController = controller;
+                                      },
+                                      color: Colors.blue.withOpacity(0.5),
+                                      markerSettings: MarkerSettings(
+                                          height: 12,
+                                          width: 12,
+                                          color: Colors.blue,
+                                          isVisible: true),
+                                      animationDuration: 500,
+                                      borderWidth: 6,
+                                      borderColor: Colors.blue.shade500,
+                                      dataSource: data,
+                                      xValueMapper: (DayScoreEntry data, _) =>
+                                          data.x,
+                                      yValueMapper: (DayScoreEntry data, _) =>
+                                          data.y)
+                                ],
+                                primaryXAxis: NumericAxis(
+                                  minimum: 0,
+                                  maximum: 24,
+                                  interval: 6,
+                                  axisLabelFormatter:
+                                      (AxisLabelRenderDetails details) =>
+                                          timeAxis(details),
+                                  // labelPlacement: LabelPlacement.onTicks,
+                                ),
+                                primaryYAxis: NumericAxis(
+                                  minimum: 0,
+                                  maximum: 10,
+                                  interval: 2,
+                                )),
+                          ])
                   ],
                 ),
               ),
@@ -171,6 +250,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
       ),
     );
   }
+}
+
+ChartAxisLabel timeAxis(AxisLabelRenderDetails details) {
+  return ChartAxisLabel(
+      "${details.text.length > 1 ? "" : "0"}${details.text}:00",
+      details.textStyle);
 }
 
 class SimpleButton extends StatelessWidget {
