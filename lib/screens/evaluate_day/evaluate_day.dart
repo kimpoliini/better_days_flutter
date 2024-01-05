@@ -7,13 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:collection/collection.dart';
 
 enum DayMode { today, otherDay }
 
 class DayScoreEntry {
   DayScoreEntry(this.x, this.y);
   final int x;
-  final double y;
+  double y;
 }
 
 class EvaluateDay extends StatefulWidget {
@@ -26,6 +27,10 @@ class EvaluateDay extends StatefulWidget {
 
 class _EvaluateDayState extends State<EvaluateDay> {
   ChartSeriesController? seriesController;
+  int selectedPointId = -1;
+
+  bool pauseScroll = false;
+
   bool isSimpleMode = true;
   DateTime? selectedDate;
   double currentSliderValue = 5;
@@ -54,6 +59,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
       data.sort(
         (a, b) => a.x.compareTo(b.x),
       );
+    });
+  }
+
+  void _updatePoint(int index, double newValue) {
+    setState(() {
+      data[index].y = newValue;
     });
   }
 
@@ -87,6 +98,9 @@ class _EvaluateDayState extends State<EvaluateDay> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
+          physics: pauseScroll
+              ? const NeverScrollableScrollPhysics()
+              : const AlwaysScrollableScrollPhysics(),
           children: [
             Row(
               children: [
@@ -165,6 +179,48 @@ class _EvaluateDayState extends State<EvaluateDay> {
                             ]),
                             const SizedBox(height: 16.0),
                             SfCartesianChart(
+                                onChartTouchInteractionDown: (tapArgs) {
+                                  final Offset value = Offset(
+                                      tapArgs.position.dx, tapArgs.position.dy);
+                                  final CartesianChartPoint<dynamic>
+                                      chartPoint =
+                                      seriesController!.pixelToPoint(value);
+
+                                  var x = (chartPoint.x as double).toInt();
+                                  double y = chartPoint.y;
+
+                                  DayScoreEntry? point =
+                                      data.firstWhereOrNull((e) => e.x == x);
+
+                                  int? pointId;
+                                  pointId =
+                                      point != null ? data.indexOf(point) : -1;
+
+                                  if (pointId > 0) {
+                                    selectedPointId = pointId;
+                                    pauseScroll = true;
+                                  }
+
+                                  log("down ${x},${y}. Point id is $pointId");
+                                },
+                                onChartTouchInteractionMove: (tapArgs) {
+                                  final Offset value = Offset(
+                                      tapArgs.position.dx, tapArgs.position.dy);
+                                  final CartesianChartPoint<dynamic>
+                                      chartPoint =
+                                      seriesController!.pixelToPoint(value);
+
+                                  var x = (chartPoint.x as double).toInt();
+                                  double y = chartPoint.y;
+
+                                  if (selectedPointId != -1 &&
+                                      y <= 10 &&
+                                      y > 0) {
+                                    _updatePoint(selectedPointId, y);
+                                  }
+
+                                  log("what move");
+                                },
                                 onChartTouchInteractionUp: (tapArgs) {
                                   final Offset value = Offset(
                                       tapArgs.position.dx, tapArgs.position.dy);
@@ -173,9 +229,20 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       chartPoint =
                                       seriesController!.pixelToPoint(value);
 
-                                  var x = chartPoint.x as double;
+                                  var x = (chartPoint.x as double).toInt();
                                   double y = chartPoint.y;
-                                  _addPoint(DayScoreEntry(x.toInt(), y));
+                                  if (x > 0 &&
+                                      x < 24 &&
+                                      y > 0 &&
+                                      y <= 10 &&
+                                      !data.any((e) => e.x == x) &&
+                                      selectedPointId == -1) {
+                                    _addPoint(DayScoreEntry(x, y));
+                                  }
+
+                                  selectedPointId = -1;
+                                  pauseScroll = false;
+                                  log("selectedpointid is $selectedPointId");
                                   log("$x, $y");
                                 },
                                 series: <CartesianSeries>[
@@ -185,12 +252,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         seriesController = controller;
                                       },
                                       color: Colors.blue.withOpacity(0.5),
-                                      markerSettings: MarkerSettings(
+                                      markerSettings: const MarkerSettings(
                                           height: 12,
                                           width: 12,
                                           color: Colors.blue,
                                           isVisible: true),
-                                      animationDuration: 500,
+                                      animationDuration: 0,
                                       borderWidth: 6,
                                       borderColor: Colors.blue.shade500,
                                       dataSource: data,
