@@ -189,8 +189,9 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                   var x = (chartPoint.x as double).toInt();
                                   double y = chartPoint.y;
 
-                                  DayScoreEntry? point =
-                                      data.firstWhereOrNull((e) => e.x == x);
+                                  DayScoreEntry? point = data.firstWhereOrNull(
+                                      (e) =>
+                                          x - 1 < e.x + 1 && x + 1 > e.x - 1);
 
                                   int? pointId;
                                   pointId =
@@ -201,7 +202,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     pauseScroll = true;
                                   }
 
-                                  log("down ${x},${y}. Point id is $pointId");
+                                  // log("down ${x},${y}. Point id is $pointId");
                                 },
                                 onChartTouchInteractionMove: (tapArgs) {
                                   final Offset value = Offset(
@@ -210,7 +211,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       chartPoint =
                                       seriesController!.pixelToPoint(value);
 
-                                  var x = (chartPoint.x as double).toInt();
+                                  // var x = (chartPoint.x as double).toInt();
                                   double y = chartPoint.y;
 
                                   if (selectedPointId != -1 &&
@@ -219,7 +220,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     _updatePoint(selectedPointId, y);
                                   }
 
-                                  log("what move");
+                                  // log("move");
                                 },
                                 onChartTouchInteractionUp: (tapArgs) {
                                   final Offset value = Offset(
@@ -241,9 +242,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                   }
 
                                   selectedPointId = -1;
+                                  //TODO: Fix scrolling being paused when dragging from the graph and releasing outside of it
                                   pauseScroll = false;
-                                  log("selectedpointid is $selectedPointId");
-                                  log("$x, $y");
                                 },
                                 series: <CartesianSeries>[
                                   SplineAreaSeries<DayScoreEntry, int>(
