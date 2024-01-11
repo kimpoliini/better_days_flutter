@@ -70,6 +70,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
     });
   }
 
+  void _removePoint(int index) {
+    setState(() {
+      data.removeAt(index);
+    });
+  }
+
   void _setPauseScroll(bool paused) {
     setState(() {
       pauseScroll = paused;
@@ -198,6 +204,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                               ]),
                               const SizedBox(height: 16.0),
                               SfCartesianChart(
+                                  //On down interaction
                                   onChartTouchInteractionDown: (tapArgs) {
                                     final Offset value = Offset(
                                         tapArgs.position.dx,
@@ -210,8 +217,14 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     double y = chartPoint.y;
 
                                     DayScoreEntry? point =
-                                        data.firstWhereOrNull((e) =>
-                                            x - 1 < e.x + 1 && x + 1 > e.x - 1);
+                                        data.firstWhereOrNull((e) {
+                                      var dx = 1, dy = 0.5;
+
+                                      return (x - dx < e.x + dx &&
+                                              x + dx > e.x - dx) &&
+                                          (y - dy < e.y + dy &&
+                                              y + dy > e.y - dy);
+                                    });
 
                                     int? pointId;
                                     pointId = point != null
@@ -222,9 +235,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       selectedPointId = pointId;
                                       _setPauseScroll(true);
                                     }
-
-                                    // log("down ${x},${y}. Point id is $pointId");
                                   },
+                                  //On move interaction
                                   onChartTouchInteractionMove: (tapArgs) {
                                     final Offset value = Offset(
                                         tapArgs.position.dx,
@@ -233,17 +245,21 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         chartPoint =
                                         seriesController!.pixelToPoint(value);
 
-                                    // var x = (chartPoint.x as double).toInt();
                                     double y = chartPoint.y;
 
-                                    if (selectedPointId != -1 &&
-                                        y <= 10 &&
-                                        y > 0) {
-                                      _updatePoint(selectedPointId, y);
+                                    if (selectedPointId != -1) {
+                                      if (y < 0 &&
+                                          data[selectedPointId].y != 0) {
+                                        _updatePoint(selectedPointId, 0);
+                                      } else if (y >= 10 &&
+                                          data[selectedPointId].y != 10) {
+                                        _updatePoint(selectedPointId, 10);
+                                      } else if (y <= 10 && y > 0) {
+                                        _updatePoint(selectedPointId, y);
+                                      }
                                     }
-
-                                    // log("move");
                                   },
+                                  //On up interaction
                                   onChartTouchInteractionUp: (tapArgs) {
                                     final Offset value = Offset(
                                         tapArgs.position.dx,
@@ -263,6 +279,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         selectedPointId == -1 &&
                                         canPlacePoint) {
                                       _addPoint(DayScoreEntry(x, y));
+                                    } else if (selectedPointId != -1 && y < 2) {
+                                      _removePoint(selectedPointId);
                                     }
 
                                     selectedPointId = -1;
