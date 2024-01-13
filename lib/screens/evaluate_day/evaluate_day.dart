@@ -4,6 +4,7 @@ import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -15,6 +16,7 @@ class DayScoreEntry {
   DayScoreEntry(this.x, this.y);
   final int x;
   double y;
+  Color color = Colors.blue;
 }
 
 class EvaluateDay extends StatefulWidget {
@@ -30,6 +32,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
   int selectedPointId = -1;
 
   bool canPlacePoint = true;
+  bool canVibrate = true;
   bool pauseScroll = false;
 
   bool isSimpleMode = true;
@@ -64,9 +67,10 @@ class _EvaluateDayState extends State<EvaluateDay> {
     });
   }
 
-  void _updatePoint(int index, double newValue) {
+  void _updatePoint(int index, double newValue, {Color color = Colors.green}) {
     setState(() {
       data[index].y = newValue;
+      data[index].color = color;
     });
   }
 
@@ -234,6 +238,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     if (pointId > 0) {
                                       selectedPointId = pointId;
                                       _setPauseScroll(true);
+                                      data[selectedPointId].color =
+                                          Colors.green;
                                     }
                                   },
                                   //On move interaction
@@ -257,7 +263,23 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       } else if (y <= 10 && y > 0) {
                                         _updatePoint(selectedPointId, y);
                                       }
+
+                                      if (y < -2 && canVibrate) {
+                                        canVibrate = false;
+                                        _updatePoint(selectedPointId, 0,
+                                            color: Colors.red);
+                                        // data[selectedPointId].color =
+                                        // Colors.red;
+                                        lightVibration();
+                                      } else if (y > -2 && !canVibrate) {
+                                        canVibrate = true;
+
+                                        data[selectedPointId].color =
+                                            Colors.green;
+                                      }
                                     }
+
+                                    seriesController!.updateDataSource();
                                   },
                                   //On up interaction
                                   onChartTouchInteractionUp: (tapArgs) {
@@ -279,8 +301,11 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         selectedPointId == -1 &&
                                         canPlacePoint) {
                                       _addPoint(DayScoreEntry(x, y));
-                                    } else if (selectedPointId != -1 && y < 2) {
+                                    } else if (selectedPointId != -1 &&
+                                        y < -2) {
                                       _removePoint(selectedPointId);
+                                    } else if (selectedPointId != -1) {
+                                      data[selectedPointId].color = Colors.blue;
                                     }
 
                                     selectedPointId = -1;
@@ -294,10 +319,11 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         },
                                         color: Colors.blue.withOpacity(0.5),
                                         markerSettings: const MarkerSettings(
-                                            height: 12,
-                                            width: 12,
-                                            color: Colors.blue,
-                                            isVisible: true),
+                                            // height: 12,
+                                            // width: 12,
+                                            // color: Colors.blue,
+                                            // isVisible: true
+                                            ),
                                         animationDuration: 0,
                                         borderWidth: 6,
                                         borderColor: Colors.blue.shade500,
@@ -305,7 +331,28 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         xValueMapper: (DayScoreEntry data, _) =>
                                             data.x,
                                         yValueMapper: (DayScoreEntry data, _) =>
-                                            data.y)
+                                            data.y),
+                                    SplineSeries<DayScoreEntry, int>(
+                                        animationDuration: 0,
+                                        splineType: SplineType.monotonic,
+                                        // color: Colors.blue,
+                                        width: 0.0,
+                                        markerSettings: MarkerSettings(
+                                          borderWidth: 10,
+                                          borderColor: Colors.black,
+                                          color: Colors.blue,
+                                          isVisible: true,
+                                          // height: 20,
+                                          // width: 20
+                                        ),
+                                        pointColorMapper:
+                                            (DayScoreEntry data, _) =>
+                                                data.color,
+                                        dataSource: data,
+                                        xValueMapper: (DayScoreEntry data, _) =>
+                                            data.x,
+                                        yValueMapper: (DayScoreEntry data, _) =>
+                                            data.y),
                                   ],
                                   primaryXAxis: NumericAxis(
                                     minimum: 0,
@@ -314,7 +361,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     axisLabelFormatter:
                                         (AxisLabelRenderDetails details) =>
                                             timeAxis(details),
-                                    // labelPlacement: LabelPlacement.onTicks,
                                   ),
                                   primaryYAxis: NumericAxis(
                                     minimum: 0,
@@ -403,4 +449,11 @@ class SimpleButton extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> lightVibration() async {
+  await SystemChannels.platform.invokeMethod<void>(
+    'HapticFeedback.vibrate',
+    'HapticFeedbackType.lightImpact',
+  );
 }
