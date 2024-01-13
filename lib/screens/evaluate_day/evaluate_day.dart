@@ -263,23 +263,24 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       } else if (y <= 10 && y > 0) {
                                         _updatePoint(selectedPointId, y);
                                       }
-
-                                      if (y < -2 && canVibrate) {
+                                      //Deleting a point
+                                      if (y < -2 &&
+                                          canVibrate &&
+                                          data[selectedPointId].x != 24) {
                                         canVibrate = false;
                                         _updatePoint(selectedPointId, 0,
                                             color: Colors.red);
-                                        // data[selectedPointId].color =
-                                        // Colors.red;
                                         lightVibration();
                                       } else if (y > -2 && !canVibrate) {
                                         canVibrate = true;
-
-                                        data[selectedPointId].color =
-                                            Colors.green;
+                                        if (data[selectedPointId].color !=
+                                            Colors.green) {
+                                          _updatePoint(selectedPointId,
+                                              data[selectedPointId].y,
+                                              color: Colors.green);
+                                        }
                                       }
                                     }
-
-                                    seriesController!.updateDataSource();
                                   },
                                   //On up interaction
                                   onChartTouchInteractionUp: (tapArgs) {
@@ -302,7 +303,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         canPlacePoint) {
                                       _addPoint(DayScoreEntry(x, y));
                                     } else if (selectedPointId != -1 &&
-                                        y < -2) {
+                                        y < -2 &&
+                                        data[selectedPointId].x != 24) {
                                       _removePoint(selectedPointId);
                                     } else if (selectedPointId != -1) {
                                       data[selectedPointId].color = Colors.blue;
@@ -318,12 +320,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                           seriesController = controller;
                                         },
                                         color: Colors.blue.withOpacity(0.5),
-                                        markerSettings: const MarkerSettings(
-                                            // height: 12,
-                                            // width: 12,
-                                            // color: Colors.blue,
-                                            // isVisible: true
-                                            ),
                                         animationDuration: 0,
                                         borderWidth: 6,
                                         borderColor: Colors.blue.shade500,
@@ -335,15 +331,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     SplineSeries<DayScoreEntry, int>(
                                         animationDuration: 0,
                                         splineType: SplineType.monotonic,
-                                        // color: Colors.blue,
                                         width: 0.0,
-                                        markerSettings: MarkerSettings(
-                                          borderWidth: 10,
+                                        markerSettings: const MarkerSettings(
+                                          borderWidth: 8,
                                           borderColor: Colors.black,
                                           color: Colors.blue,
                                           isVisible: true,
-                                          // height: 20,
-                                          // width: 20
                                         ),
                                         pointColorMapper:
                                             (DayScoreEntry data, _) =>
