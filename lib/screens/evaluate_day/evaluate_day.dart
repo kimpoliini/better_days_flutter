@@ -108,7 +108,9 @@ class _EvaluateDayState extends State<EvaluateDay> {
                     appState.addEntry(HistoryEntry(
                         date: selectedDate!,
                         description: note.isEmpty ? null : note,
-                        score: currentSliderValue));
+                        score: isSimpleMode
+                            ? currentSliderValue
+                            : averagePointScore(data)));
                     Navigator.pop(context);
                   }
                 : null),
@@ -201,12 +203,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
                             )
                           //Advanced mode
                           : Column(children: [
-                              Row(children: [
-                                Text(
-                                    "About what time did you wake up ${isToday ? "today" : "this day"}?"),
-                                const Text("10"),
-                              ]),
-                              const SizedBox(height: 16.0),
+                              // Row(children: [
+                              //   Text(
+                              //       "About what time did you wake up ${isToday ? "today" : "this day"}?"),
+                              //   const Text("10"),
+                              // ]),
+                              // const SizedBox(height: 16.0),
                               SfCartesianChart(
                                   //On down interaction
                                   onChartTouchInteractionDown: (tapArgs) {
@@ -442,6 +444,13 @@ class SimpleButton extends StatelessWidget {
       ),
     );
   }
+}
+
+double averagePointScore(List<DayScoreEntry> entries) {
+  double total =
+      entries.fold(0, (previousValue, element) => previousValue + element.y);
+
+  return double.parse((total / entries.length).toStringAsFixed(1));
 }
 
 Future<void> lightVibration() async {
