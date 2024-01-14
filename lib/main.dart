@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/history.dart';
 import 'package:better_days_flutter/screens/profile.dart';
@@ -19,6 +20,11 @@ class MainApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => AppState(),
       child: MaterialApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: [
+          const Locale('en', 'GB'),
+          const Locale('se', 'SV'),
+        ],
         title: "Better days",
         home: const MainPage(),
         theme: ThemeData(
@@ -39,11 +45,11 @@ class MainApp extends StatelessWidget {
 class AppState extends ChangeNotifier {
   //Mock initialize history entries
   var historyEntries = <HistoryEntry>[
-    for (int i = 0; i < 20; i++)
-      HistoryEntry(
-          date: DateTime.now().subtract(Duration(days: (i + 1) * 2)),
-          score:
-              double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
+    // for (int i = 0; i < 20; i++)
+    //   HistoryEntry(
+    //       date: DateTime.now().subtract(Duration(days: (i + 1) * 2)),
+    //       score:
+    //           double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];
 
   void addEntry(HistoryEntry entry) {
@@ -84,12 +90,12 @@ class _MainPageState extends State<MainPage> {
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
-        floatingActionButton: _selectedIndex == 1
-            ? FloatingActionButton(
-                child: const Icon(Icons.add),
-                onPressed: () =>
-                    state.addEntry(HistoryEntry(date: DateTime(2023, 12, 23))))
-            : null,
+        // floatingActionButton: _selectedIndex == 1
+        //     ? FloatingActionButton(
+        //         child: const Icon(Icons.add),
+        //         onPressed: () =>
+        //             state.addEntry(HistoryEntry(date: DateTime(2023, 12, 23))))
+        //     : null,
         appBar: AppBar(centerTitle: true, title: const Text("Better days")),
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBar(

@@ -21,7 +21,9 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     var state = context.watch<AppState>();
     var hasEvaluatedToday = DateFormat.yMd().format(DateTime.now()) ==
-        DateFormat.yMd().format(state.historyEntries.first.date);
+        DateFormat.yMd().format(state.historyEntries.isNotEmpty
+            ? state.historyEntries.first.date
+            : DateTime(1900));
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -119,7 +121,11 @@ class PastWeekChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var entries = context.watch<AppState>().historyEntries;
-    var thisWeekEntries = entries.getRange(0, 7).toList().reversed.toList();
+    var thisWeekEntries = entries
+        .getRange(0, entries.length >= 7 ? 7 : entries.length)
+        .toList()
+        .reversed
+        .toList();
 
     List<ChartData> data = <ChartData>[];
 
@@ -133,9 +139,8 @@ class PastWeekChart extends StatelessWidget {
 
       data.add(ChartData(i + 1, what?.score));
     }
-    bool hasData = data.fold(
-            0.0, (previousValue, element) => previousValue + (element.y ?? 0)) >
-        0;
+    bool hasData = data.fold(0.0, (prev, e) => prev + (e.y ?? 0)) > 0;
+
     return SfCartesianChart(
       series: <CartesianSeries>[
         SplineSeries<ChartData, int>(

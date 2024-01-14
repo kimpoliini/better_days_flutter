@@ -30,9 +30,12 @@ class History extends StatelessWidget {
             child: HistoryCard(entry: entry))
     ];
 
-    return ListView(
-      dragStartBehavior: DragStartBehavior.start,
-      children: testHistoryEntries,
-    );
+    //TODO: Fix not updating instantly
+    return state.historyEntries.isNotEmpty
+        ? ListView(
+            dragStartBehavior: DragStartBehavior.start,
+            children: testHistoryEntries,
+          )
+        : const Center(child: Text("No entries yet"));
   }
 }

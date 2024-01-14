@@ -150,6 +150,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                         ? null
                         : () async {
                             var selected = await showDatePicker(
+                                locale: const Locale('en', 'GB'),
                                 context: context,
                                 firstDate: DateTime(2000, 1),
                                 lastDate: DateTime.now()
