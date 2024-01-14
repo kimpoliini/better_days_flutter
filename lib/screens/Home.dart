@@ -133,7 +133,9 @@ class PastWeekChart extends StatelessWidget {
 
       data.add(ChartData(i + 1, what?.score));
     }
-
+    bool hasData = data.fold(
+            0.0, (previousValue, element) => previousValue + (element.y ?? 0)) >
+        0;
     return SfCartesianChart(
       series: <CartesianSeries>[
         SplineSeries<ChartData, int>(
@@ -146,7 +148,7 @@ class PastWeekChart extends StatelessWidget {
                 color: Colors.green.shade200,
                 isVisible: true),
             emptyPointSettings: EmptyPointSettings(
-              mode: EmptyPointMode.average,
+              mode: hasData ? EmptyPointMode.average : EmptyPointMode.gap,
               color: Colors.grey.shade500,
               borderColor: Colors.green.shade200,
               borderWidth: 4,
