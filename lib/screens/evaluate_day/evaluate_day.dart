@@ -83,6 +83,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
   void _removeAllPoints() {
     setState(() {
       data.removeWhere((element) => element.x != 0 && element.x != 24);
+      data[0].y = 5;
+      data[1].y = 5;
     });
   }
 
@@ -260,11 +262,15 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         seriesController!.pixelToPoint(value);
 
                                     var x = (chartPoint.x as double).toInt();
+                                    // double x = chartPoint.x;
                                     double y = chartPoint.y;
+                                    y = (y * 2).round() / 2;
 
                                     DayScoreEntry? point =
                                         data.firstWhereOrNull((e) {
-                                      var dx = 1, dy = 0.5;
+                                      var dx = 0.5, dy = 0.5;
+
+                                      // if (x <= 1) return true;
 
                                       return (x - dx < e.x + dx &&
                                               x + dx > e.x - dx) &&
@@ -277,7 +283,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         ? data.indexOf(point)
                                         : -1;
 
-                                    if (pointId > 0) {
+                                    if (pointId >= 0) {
                                       selectedPointId = pointId;
                                       _setPauseScroll(true);
                                       data[selectedPointId].color =
@@ -294,7 +300,10 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         seriesController!.pixelToPoint(value);
 
                                     double y = chartPoint.y;
+                                    y = (y * 2).round() / 2;
 
+                                    //Makes sure points never go below 0 or above 10
+                                    //Maybe move most of this to _updatePoint()?
                                     if (selectedPointId != -1) {
                                       if (y < 0 &&
                                           data[selectedPointId].y != 0) {
@@ -308,7 +317,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       //Deleting a point
                                       if (y < -2 &&
                                           canVibrate &&
-                                          data[selectedPointId].x != 24) {
+                                          data[selectedPointId].x != 24 &&
+                                          data[selectedPointId].x != 0) {
                                         canVibrate = false;
                                         _updatePoint(selectedPointId, 0,
                                             color: Colors.red);
@@ -336,6 +346,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
 
                                     var x = (chartPoint.x as double).toInt();
                                     double y = chartPoint.y;
+                                    y = (y * 2).round() / 2;
+
                                     if (x > 0 &&
                                         x < 24 &&
                                         y > 0 &&
