@@ -80,6 +80,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
     });
   }
 
+  void _removeAllPoints() {
+    setState(() {
+      data.removeWhere((element) => element.x != 0 && element.x != 24);
+    });
+  }
+
   void _setPauseScroll(bool paused) {
     setState(() {
       pauseScroll = paused;
@@ -204,6 +210,39 @@ class _EvaluateDayState extends State<EvaluateDay> {
                             )
                           //Advanced mode
                           : Column(children: [
+                              Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        "Hint: Press the graph to create a point, drag the point below the graph to delete it",
+                                        style: TextStyle(
+                                          fontSize: 12.0,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+
+                                    //Reset button
+                                    Card(
+                                      child: InkWell(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12.0)),
+                                        onTap: () {
+                                          _removeAllPoints();
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.autorenew,
+                                            size: 32.0,
+                                            color: Colors.green.shade200,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ]),
                               // Row(children: [
                               //   Text(
                               //       "About what time did you wake up ${isToday ? "today" : "this day"}?"),
