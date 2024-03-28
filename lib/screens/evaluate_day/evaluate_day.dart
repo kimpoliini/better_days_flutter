@@ -225,7 +225,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         ),
                                       ),
                                     ),
-
                                     //Reset button
                                     Card(
                                       child: InkWell(
@@ -252,7 +251,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
                               // ]),
                               // const SizedBox(height: 16.0),
                               SfCartesianChart(
-                                  //On down interaction
                                   onChartTouchInteractionDown: (tapArgs) {
                                     final Offset value = Offset(
                                         tapArgs.position.dx,
@@ -262,7 +260,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         seriesController!.pixelToPoint(value);
 
                                     var x = (chartPoint.x as double).toInt();
-                                    // double x = chartPoint.x;
                                     double y = chartPoint.y;
                                     y = (y * 2).round() / 2;
 
@@ -270,7 +267,11 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                         data.firstWhereOrNull((e) {
                                       var dx = 0.5, dy = 0.5;
 
-                                      // if (x <= 1) return true;
+                                      if (chartPoint.x > 23.25) {
+                                        return (e.x == 24) &&
+                                            (y - dy < e.y + dy &&
+                                                y + dy > e.y - dy);
+                                      }
 
                                       return (x - dx < e.x + dx &&
                                               x + dx > e.x - dx) &&
@@ -402,13 +403,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                             data.y),
                                   ],
                                   primaryXAxis: NumericAxis(
-                                    minimum: 0,
-                                    maximum: 24,
-                                    interval: 6,
-                                    axisLabelFormatter:
-                                        (AxisLabelRenderDetails details) =>
-                                            timeAxis(details),
-                                  ),
+                                      minimum: 0,
+                                      maximum: 24,
+                                      interval: 6,
+                                      axisLabelFormatter:
+                                          (AxisLabelRenderDetails details) =>
+                                              timeAxis(details)),
                                   primaryYAxis: NumericAxis(
                                     minimum: 0,
                                     maximum: 10,
