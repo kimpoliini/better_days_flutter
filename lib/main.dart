@@ -43,11 +43,14 @@ class MainApp extends StatelessWidget {
 }
 
 class AppState extends ChangeNotifier {
-  //Mock initialize history entries
   var historyEntries = <HistoryEntry>[
-    // for (int i = 0; i < 20; i++)
+    //Mock initialize history entries
+
+    // for (int i = 0; i < 200; i++)
     //   HistoryEntry(
-    //       date: DateTime.now().subtract(Duration(days: (i + 1) * 2)),
+    //       date: DateTime(
+    //               DateTime.now().year, DateTime.now().month, DateTime.now().day)
+    //           .subtract(Duration(days: (i + 1) * 2)),
     //       score:
     //           double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];

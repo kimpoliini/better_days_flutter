@@ -157,7 +157,22 @@ class _EvaluateDayState extends State<EvaluateDay> {
                     onTap: isToday
                         ? null
                         : () async {
+                            List<DateTime> evaluatedDays = appState
+                                .historyEntries
+                                .map((e) => e.date)
+                                .toList()
+                                .sublist(0, 90);
+
                             var selected = await showDatePicker(
+                                selectableDayPredicate: (DateTime val) =>
+                                    !evaluatedDays.contains(val) &&
+                                    val.isAfter(DateTime.now().subtract(
+                                        const Duration(
+                                            days:
+                                                90))), //Limit selection to three months prior
+                                // builder: (context, child) => Theme(
+                                //     data: Theme.of(context).copyWith(),
+                                //     child: child!),
                                 locale: const Locale('en', 'GB'),
                                 context: context,
                                 firstDate: DateTime(2000, 1),
