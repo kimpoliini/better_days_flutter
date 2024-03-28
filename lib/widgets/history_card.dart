@@ -11,6 +11,9 @@ class HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isThisYear = DateTime.now().year == entry.date.year;
+    bool isThisMonth = DateTime.now().month == entry.date.month;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Padding(
@@ -20,7 +23,11 @@ class HistoryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                DateFormat.MMMMEEEEd().format(entry.date),
+                isThisMonth
+                    ? DateFormat.MMMMEEEEd().format(entry.date)
+                    : (isThisYear
+                        ? DateFormat.MMMEd().format(entry.date)
+                        : DateFormat.yMMMd().format(entry.date)),
                 style: headerStyle,
               ),
               Text(
