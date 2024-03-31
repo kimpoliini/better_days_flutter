@@ -24,7 +24,9 @@ class HistoryCard extends StatelessWidget {
             children: [
               Text(
                 isThisMonth
-                    ? DateFormat.MMMMEEEEd().format(entry.date)
+                    ? (isThisYear
+                        ? DateFormat.MMMMEEEEd().format(entry.date)
+                        : DateFormat.yMMMd().format(entry.date))
                     : (isThisYear
                         ? DateFormat.MMMEd().format(entry.date)
                         : DateFormat.yMMMd().format(entry.date)),
