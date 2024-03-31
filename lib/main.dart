@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'screens/home.dart';
 import 'package:provider/provider.dart';
 
+var now = DateTime.now();
 void main() {
   runApp(const MainApp());
 }
@@ -43,19 +44,22 @@ class MainApp extends StatelessWidget {
 }
 
 class AppState extends ChangeNotifier {
+  bool fixed = false;
   var historyEntries = <HistoryEntry>[
     //Mock initialize history entries
 
     for (int i = 0; i < 200; i++)
       HistoryEntry(
-          date: DateTime(
-                  DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          date: DateTime(now.year, now.month, now.day)
               .subtract(Duration(days: (i + 1) * 2)),
           score:
               double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];
 
   void addEntry(HistoryEntry entry) {
+    var dateOnly = DateTime(entry.date.year, entry.date.month, entry.date.day);
+    entry.date = dateOnly;
+
     historyEntries.add(entry);
 
     historyEntries.sort((a, b) => b.date.compareTo(a.date));
@@ -64,6 +68,18 @@ class AppState extends ChangeNotifier {
 
   void removeEntry(HistoryEntry entry) {
     if (historyEntries.contains(entry)) historyEntries.remove(entry);
+  }
+
+  void fixEntries() {
+    if (!fixed) {
+      for (var element in historyEntries) {
+        var hour = element.date.hour;
+        if (hour != 0) {
+          element.date = element.date.add(Duration(hours: 24 - hour));
+        }
+      }
+    }
+    fixed = true;
   }
 }
 
@@ -91,14 +107,10 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     var state = context.watch<AppState>();
 
+    state.fixEntries();
+
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
-        // floatingActionButton: _selectedIndex == 1
-        //     ? FloatingActionButton(
-        //         child: const Icon(Icons.add),
-        //         onPressed: () =>
-        //             state.addEntry(HistoryEntry(date: DateTime(2023, 12, 23))))
-        //     : null,
         appBar: AppBar(centerTitle: true, title: const Text("Better days")),
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBar(

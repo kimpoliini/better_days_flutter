@@ -160,16 +160,22 @@ class _EvaluateDayState extends State<EvaluateDay> {
                             List<DateTime> evaluatedDays = appState
                                 .historyEntries
                                 .map((e) => e.date)
-                                .toList()
-                                .sublist(0, 90);
+                                .toList();
+                            if (evaluatedDays.length >= 90) {
+                              evaluatedDays.sublist(0, 90);
+                            }
+
+                            log(evaluatedDays.toString());
 
                             var selected = await showDatePicker(
-                                selectableDayPredicate: (DateTime val) =>
-                                    !evaluatedDays.contains(val) &&
-                                    val.isAfter(DateTime.now().subtract(
-                                        const Duration(
-                                            days:
-                                                90))), //Limit selection to three months prior
+                                selectableDayPredicate: (DateTime val) {
+                                  log(val.toString());
+                                  return !evaluatedDays.contains(val) &&
+                                      val.isAfter(DateTime.now().subtract(
+                                          const Duration(
+                                              days:
+                                                  90))); //Limit selection to three months prior
+                                },
                                 // builder: (context, child) => Theme(
                                 //     data: Theme.of(context).copyWith(),
                                 //     child: child!),
@@ -177,7 +183,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                 context: context,
                                 firstDate: DateTime(2000, 1),
                                 lastDate: DateTime.now()
-                                    .subtract(const Duration(days: 1)));
+                                // .subtract(const Duration(days: 1))
+                                );
                             if (selected != null) _setDate(selected);
                           },
                   ),

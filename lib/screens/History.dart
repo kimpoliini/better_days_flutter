@@ -45,12 +45,13 @@ class History extends StatelessWidget {
     //     return MessageItem(sortedEntries[i]);
     //   }
     // });
-
-    items.insert(
-        0,
-        HeadingItem(DateTime.now().month == sortedEntries[0].date.month
-            ? "This month"
-            : DateFormat.MMMM().format(sortedEntries[0].date)));
+    if (items.isNotEmpty) {
+      items.insert(
+          0,
+          HeadingItem(DateTime.now().month == sortedEntries[0].date.month
+              ? "This month"
+              : DateFormat.MMMM().format(sortedEntries[0].date)));
+    }
 
     // final List<Widget> testHistoryEntries = <Widget>[
     //   for (var entry in sortedEntries)
