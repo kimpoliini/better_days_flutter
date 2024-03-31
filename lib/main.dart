@@ -46,13 +46,13 @@ class AppState extends ChangeNotifier {
   var historyEntries = <HistoryEntry>[
     //Mock initialize history entries
 
-    // for (int i = 0; i < 200; i++)
-    //   HistoryEntry(
-    //       date: DateTime(
-    //               DateTime.now().year, DateTime.now().month, DateTime.now().day)
-    //           .subtract(Duration(days: (i + 1) * 2)),
-    //       score:
-    //           double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
+    for (int i = 0; i < 200; i++)
+      HistoryEntry(
+          date: DateTime(
+                  DateTime.now().year, DateTime.now().month, DateTime.now().day)
+              .subtract(Duration(days: (i + 1) * 2)),
+          score:
+              double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];
 
   void addEntry(HistoryEntry entry) {
