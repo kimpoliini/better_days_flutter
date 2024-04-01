@@ -168,12 +168,12 @@ class PastWeekChart extends StatelessWidget {
             splineType: SplineType.monotonic,
             markerSettings: MarkerSettings(
                 borderWidth: 0,
-                height: 18,
-                width: 18,
+                height: 20,
+                width: 20,
                 color: Colors.green.shade200,
                 isVisible: true),
             emptyPointSettings: EmptyPointSettings(
-              mode: hasData ? EmptyPointMode.average : EmptyPointMode.gap,
+              mode: hasData ? EmptyPointMode.drop : EmptyPointMode.gap,
               color: Colors.grey.shade500,
               borderColor: Colors.green.shade200,
               borderWidth: 4,
@@ -189,7 +189,8 @@ class PastWeekChart extends StatelessWidget {
           maximum: 6.33,
           minimum: 0,
           plotOffset: 16,
-          axisLabelFormatter: (AxisLabelRenderDetails details) => axis(details),
+          axisLabelFormatter: (AxisLabelRenderDetails details) =>
+              axis(details, data),
           labelPlacement: LabelPlacement.onTicks),
       primaryYAxis: NumericAxis(
         plotOffset: 16,
@@ -201,18 +202,21 @@ class PastWeekChart extends StatelessWidget {
   }
 }
 
-ChartAxisLabel axis(AxisLabelRenderDetails details) {
-  var today = DateFormat.EEEE().format(DateTime.now());
+ChartAxisLabel axis(AxisLabelRenderDetails details, List<ChartData> data) {
   var value = int.parse(details.text);
   var day = DateFormat.EEEE()
       .format(DateTime.now().subtract(Duration(days: 7 - value)));
+  bool isToday = DateFormat.EEEE().format(DateTime.now()) == day;
 
-  var dayStyle = day == today
-      ? const TextStyle(
-          decoration: TextDecoration.underline,
-          decorationThickness: 2,
-          decorationStyle: TextDecorationStyle.dotted)
-      : details.textStyle;
+  bool isEvaluated = data[value - 1].y != null;
 
-  return ChartAxisLabel(day.substring(0, 3), dayStyle);
+  var style = details.textStyle.copyWith(
+    color: isEvaluated ? Colors.green.shade500 : null,
+    fontSize: isToday ? 14 : null,
+    decoration: isToday ? TextDecoration.underline : null,
+    decorationThickness: isToday ? 2 : null,
+    decorationStyle: isToday ? TextDecorationStyle.dotted : null,
+  );
+
+  return ChartAxisLabel(day.substring(0, 3), style);
 }
