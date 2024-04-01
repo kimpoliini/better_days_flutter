@@ -29,6 +29,24 @@ class Home extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: ListView(
         children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Hi Kim, how was your day?",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: Colors.grey.shade800),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
           const MainGraphCard(),
           const SizedBox(
             height: 8,
@@ -69,7 +87,7 @@ class Home extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
-                      text: "Evaluate other day",
+                      text: "Evaluate a different day",
                       icon: Icons.keyboard_arrow_right,
                       filled: false,
                       onTap: () {
@@ -249,6 +267,7 @@ class EvaluateDayButton extends StatelessWidget {
                       color: filled
                           ? Colors.white
                           : color ?? Colors.green.shade200),
+                  textAlign: TextAlign.center,
                 ),
               ),
               if (icon != null)
