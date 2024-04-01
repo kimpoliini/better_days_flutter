@@ -18,39 +18,35 @@ class History extends StatelessWidget {
     sortedEntries.sort((a, b) => b.date.compareTo(a.date));
 
     var items = List<ListItem>.generate(sortedEntries.length, (i) {
-      return MessageItem(sortedEntries[i]);
+      return EntryItem(sortedEntries[i]);
     });
 
     var currentMonthOffset = 0;
     sortedEntries.asMap().forEach((i, e) {
       if (i > 0) {
         if (sortedEntries[i].date.month != sortedEntries[i - 1].date.month) {
-          items.insert(i + currentMonthOffset,
-              HeadingItem(DateFormat.MMMM().format(sortedEntries[i].date)));
+          items.insert(
+              i + currentMonthOffset,
+              HeadingItem(
+                  DateTime.now().year == sortedEntries[i].date.year
+                      ? ""
+                      : DateFormat.y().format(sortedEntries[i].date),
+                  DateFormat.MMMM().format(sortedEntries[i].date)));
           currentMonthOffset++;
         }
       }
     });
 
-    // return HeadingItem(DateFormat.MMMM().format(sortedEntries[i].date));
-
-    // var items = List<ListItem>.generate(sortedEntries.length, (i) {
-    //   if (i > 0) {
-    //     if (sortedEntries[i].date.month != sortedEntries[i - 1].date.month) {
-    //       return HeadingItem(DateFormat.MMMM().format(sortedEntries[i].date));
-    //     } else {
-    //       return MessageItem(sortedEntries[i]);
-    //     }
-    //   } else {
-    //     return MessageItem(sortedEntries[i]);
-    //   }
-    // });
     if (items.isNotEmpty) {
       items.insert(
           0,
-          HeadingItem(DateTime.now().month == sortedEntries[0].date.month
-              ? "This month"
-              : DateFormat.MMMM().format(sortedEntries[0].date)));
+          HeadingItem(
+              DateTime.now().year == sortedEntries[0].date.year
+                  ? ""
+                  : DateFormat.y().format(sortedEntries[0].date),
+              DateTime.now().month == sortedEntries[0].date.month
+                  ? "This month"
+                  : DateFormat.MMMM().format(sortedEntries[0].date)));
     }
 
     // final List<Widget> testHistoryEntries = <Widget>[
@@ -67,7 +63,6 @@ class History extends StatelessWidget {
     //         child: HistoryCard(entry: entry))
     // ];
 
-    //TODO: Fix not updating instantly
     return state.historyEntries.isNotEmpty
         ? ListView.builder(
             itemCount: items.length,
@@ -80,32 +75,47 @@ class History extends StatelessWidget {
   }
 }
 
-/// The base class for the different types of items the list can contain.
 abstract class ListItem {
-  /// The title line to show in a list item.
   Widget buildTitle(BuildContext context);
 }
 
-/// A ListItem that contains data to display a heading.
 class HeadingItem implements ListItem {
-  final String heading;
+  final String year;
+  final String month;
 
-  HeadingItem(this.heading);
+  HeadingItem(this.year, this.month);
 
   @override
   Widget buildTitle(BuildContext context) {
-    return Text(
-      heading,
-      style: Theme.of(context).textTheme.headlineSmall,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        year.isNotEmpty
+            ? Padding(
+                padding:
+                    const EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0),
+                child: Text(
+                  year,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              )
+            : const SizedBox.shrink(),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            month,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
+      ],
     );
   }
 }
 
-/// A ListItem that contains data to display a message.
-class MessageItem implements ListItem {
+class EntryItem implements ListItem {
   final HistoryEntry entry;
 
-  MessageItem(this.entry);
+  EntryItem(this.entry);
 
   @override
   Widget buildTitle(BuildContext context) => HistoryCard(entry: entry);
