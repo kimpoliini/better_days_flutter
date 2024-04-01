@@ -167,27 +167,18 @@ class _EvaluateDayState extends State<EvaluateDay> {
                             if (evaluatedDays.length >= 90) {
                               evaluatedDays.sublist(0, 90);
                             }
-
-                            dev.log(evaluatedDays.toString());
-
                             var selected = await showDatePicker(
                                 selectableDayPredicate: (DateTime val) {
-                                  dev.log(val.toString());
                                   return !evaluatedDays.contains(val) &&
                                       val.isAfter(DateTime.now().subtract(
                                           const Duration(
                                               days:
                                                   90))); //Limit selection to three months prior
                                 },
-                                // builder: (context, child) => Theme(
-                                //     data: Theme.of(context).copyWith(),
-                                //     child: child!),
                                 locale: const Locale('en', 'GB'),
                                 context: context,
                                 firstDate: DateTime(2000, 1),
-                                lastDate: DateTime.now()
-                                // .subtract(const Duration(days: 1))
-                                );
+                                lastDate: DateTime.now());
                             if (selected != null) _setDate(selected);
                           },
                   ),
@@ -243,7 +234,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                   children: [
                                     Flexible(
                                       child: Text(
-                                        "Hint: Press the graph to create a point, drag the point below the graph to delete it",
+                                        "Hint: Press the graph to create a point\nDrag a point below the graph to delete it",
                                         style: TextStyle(
                                           fontSize: 12.0,
                                           color: Colors.grey.shade700,
