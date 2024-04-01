@@ -1,4 +1,5 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
+import 'dart:math';
 
 import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
@@ -167,11 +168,11 @@ class _EvaluateDayState extends State<EvaluateDay> {
                               evaluatedDays.sublist(0, 90);
                             }
 
-                            log(evaluatedDays.toString());
+                            dev.log(evaluatedDays.toString());
 
                             var selected = await showDatePicker(
                                 selectableDayPredicate: (DateTime val) {
-                                  log(val.toString());
+                                  dev.log(val.toString());
                                   return !evaluatedDays.contains(val) &&
                                       val.isAfter(DateTime.now().subtract(
                                           const Duration(
@@ -287,25 +288,50 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                     double y = chartPoint.y;
                                     y = (y * 2).round() / 2;
 
-                                    DayScoreEntry? point =
-                                        data.firstWhereOrNull((e) {
-                                      var dx = 0.5, dy = 0.5;
+                                    // DayScoreEntry? point =
+                                    //     data.firstWhereOrNull((e) {
+                                    //   var dx = 0.5, dy = 0.5;
 
-                                      if (chartPoint.x > 23.25) {
-                                        return (e.x == 24) &&
-                                            (y - dy < e.y + dy &&
-                                                y + dy > e.y - dy);
-                                      }
+                                    //   return (chartPoint.x > 23.25
+                                    //           ? (e.x == 24)
+                                    //           : (x - dx < e.x + dx &&
+                                    //               x + dx > e.x - dx)) &&
+                                    //       (y - dy < e.y + dy &&
+                                    //           y + dy > e.y - dy);
+                                    // });
 
-                                      return (x - dx < e.x + dx &&
-                                              x + dx > e.x - dx) &&
+                                    //Gets a list of valid points to be moved
+                                    //when pressing the graph
+                                    List<DayScoreEntry> validPoints =
+                                        data.where((e) {
+                                      var dx = 1, dy = 0.5;
+
+                                      return (chartPoint.x > 23.25
+                                              ? (e.x == 24)
+                                              : (x - dx < e.x + dx &&
+                                                  x + dx > e.x - dx)) &&
                                           (y - dy < e.y + dy &&
                                               y + dy > e.y - dy);
-                                    });
+                                    }).toList();
+
+                                    //Get differences between
+                                    //press and point positions
+                                    List<double> diffs = validPoints
+                                        .map((e) => e.x > chartPoint.x
+                                            ? (e.x - chartPoint.x) as double
+                                            : (chartPoint.x - e.x) as double)
+                                        .toList();
+
+                                    //Get index of nearest point
+                                    DayScoreEntry? nearestPoint = validPoints
+                                            .isNotEmpty
+                                        ? validPoints[
+                                            diffs.indexOf(diffs.reduce(min))]
+                                        : null;
 
                                     int? pointId;
-                                    pointId = point != null
-                                        ? data.indexOf(point)
+                                    pointId = nearestPoint != null
+                                        ? data.indexOf(nearestPoint)
                                         : -1;
 
                                     if (pointId >= 0) {
@@ -383,7 +409,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                                       _addPoint(DayScoreEntry(x, y));
                                     } else if (selectedPointId != -1 &&
                                         y < -2 &&
-                                        data[selectedPointId].x != 24) {
+                                        data[selectedPointId].x != 24 &&
+                                        data[selectedPointId].x != 0) {
                                       _removePoint(selectedPointId);
                                     } else if (selectedPointId != -1) {
                                       data[selectedPointId].color = Colors.blue;
