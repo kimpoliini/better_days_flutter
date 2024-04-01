@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:collection/collection.dart';
 
+import '../../widgets/evaluate_day_button.dart';
+
 enum DayMode { today, otherDay }
 
 class DayScoreEntry {
