@@ -28,26 +28,16 @@ class Home extends StatelessWidget {
             : DateTime(1900));
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ListView(
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Hi Kim, how was your day?",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: Colors.grey.shade800),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("Hi Kim, how was your day?",
+                style: TextStyle(
+                    color: Colors.green.shade300,
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.w300)),
           ),
           const MainGraphCard(),
           const SizedBox(
@@ -59,7 +49,7 @@ class Home extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Expanded(child: SizedBox()),
+                  // const Expanded(child: SizedBox()),
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
@@ -79,13 +69,13 @@ class Home extends StatelessWidget {
                       },
                     ),
                   ),
-                  const Expanded(child: SizedBox()),
+                  // const Expanded(child: SizedBox()),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Expanded(child: SizedBox()),
+                  // const Expanded(child: SizedBox()),
                   Expanded(
                     flex: 3,
                     child: EvaluateDayButton(
@@ -101,7 +91,7 @@ class Home extends StatelessWidget {
                       },
                     ),
                   ),
-                  const Expanded(child: SizedBox()),
+                  // const Expanded(child: SizedBox()),
                 ],
               ),
             ],

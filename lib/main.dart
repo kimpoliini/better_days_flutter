@@ -9,6 +9,7 @@ import 'screens/home.dart';
 import 'package:provider/provider.dart';
 
 var now = DateTime.now();
+// var appBarTitle = "Overview";
 void main() {
   runApp(const MainApp());
 }
@@ -22,11 +23,11 @@ class MainApp extends StatelessWidget {
       create: (context) => AppState(),
       child: MaterialApp(
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        supportedLocales: [
-          const Locale('en', 'GB'),
-          const Locale('se', 'SV'),
+        supportedLocales: const [
+          Locale('en', 'GB'),
+          Locale('se', 'SV'),
         ],
-        title: "Better days",
+        title: "Better Days",
         home: const MainPage(),
         theme: ThemeData(
             //Fixes InkWell being stuck in a highlighted state when navigating
@@ -45,6 +46,8 @@ class MainApp extends StatelessWidget {
 
 class AppState extends ChangeNotifier {
   bool fixed = false;
+  String appBarTitle = "Overview";
+
   var historyEntries = <HistoryEntry>[
     //Mock initialize history entries
 
@@ -92,6 +95,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   var _selectedIndex = 0;
+  String _appBarTitle = "Overview";
 
   static const List<Widget> _mainPageScreens = <Widget>[
     Home(),
@@ -100,7 +104,21 @@ class _MainPageState extends State<MainPage> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
+    setState(() {
+      switch (index) {
+        case 0:
+          _appBarTitle = "Overview";
+          break;
+        case 1:
+          _appBarTitle = "History";
+          break;
+        case 2:
+          _appBarTitle = "Profile";
+          break;
+      }
+
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -111,7 +129,7 @@ class _MainPageState extends State<MainPage> {
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
-        appBar: AppBar(centerTitle: true, title: const Text("Better days")),
+        appBar: AppBar(centerTitle: true, title: Text(_appBarTitle)),
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: _onItemTapped,
