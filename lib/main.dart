@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:better_days_flutter/screens/settings.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/history.dart';
@@ -129,7 +130,22 @@ class _MainPageState extends State<MainPage> {
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
-        appBar: AppBar(centerTitle: true, title: Text(_appBarTitle)),
+        appBar: AppBar(
+            centerTitle: true,
+            title: Text(_appBarTitle),
+            actions: _selectedIndex == 2
+                ? <Widget>[
+                    IconButton(
+                      onPressed: () => {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Settings()))
+                      },
+                      icon: const Icon(Icons.settings),
+                    )
+                  ]
+                : null),
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: _onItemTapped,
