@@ -157,19 +157,7 @@ class _MainPageState extends State<MainPage> {
         appBar: AppBar(
             centerTitle: true,
             title: Text(_appBarTitle),
-            actions: _selectedIndex == 2
-                ? <Widget>[
-                    IconButton(
-                      onPressed: () => {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Settings()))
-                      },
-                      icon: const Icon(Icons.settings),
-                    )
-                  ]
-                : null),
+            actions: getCurrentTabActions(context, _selectedIndex)),
         body: _mainPageScreens.elementAt(_selectedIndex),
         bottomNavigationBar: NavigationBar(
           onDestinationSelected: _onItemTapped,
@@ -195,9 +183,88 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
+List<Widget>? getCurrentTabActions(BuildContext context, int index) {
+  List<Widget> actions = [];
+
+  switch (index) {
+    case 2:
+      actions = <Widget>[
+        IconButton(
+          onPressed: () => {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Settings()))
+          },
+          icon: const Icon(Icons.settings),
+        )
+      ];
+      break;
+    case 1:
+      actions = <Widget>[
+        IconButton(
+          onPressed: () => {_showDeleteDialog(context)},
+          icon: const Icon(Icons.delete_sweep),
+        )
+      ];
+      break;
+    default:
+      return null;
+  }
+
+  return actions;
+}
+
+Future<void> _showDeleteDialog(BuildContext context) async {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Clear history'),
+        content: const SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Remove all evaluated days?'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }),
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () async {
+              await deleteHistoryItems();
+
+              if (context.mounted) {
+                Provider.of<AppState>(context, listen: false)
+                    .updateEntriesAsync();
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> deleteHistoryItems() async {
+  final dir = await getApplicationDocumentsDirectory();
+  final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+
+  await db.writeTxn(() async {
+    await db.historyItems.where().deleteAll();
+  });
+
+  await db.close();
+}
+
 Future<List<HistoryItem>> getHistoryItems() async {
   final dir = await getApplicationDocumentsDirectory();
   final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+
   var items = await db.historyItems.where().findAll();
   await db.close();
 

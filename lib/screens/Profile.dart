@@ -64,16 +64,16 @@ class _ProfileState extends State<Profile> {
                     collapsedShape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0)),
                     // leading: SizedBox(width: 0.0),
-                    leading: Text(
+                    leading: const Text(
                       "Additional information",
                       // "Show ${isExpanded ? "less" : "more"}",
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                     // trailing: SizedBox(width: 0.0),
                     // iconColor: Colors.transparent,
                     controlAffinity: ListTileControlAffinity.trailing,
                     title: const Text(""),
-                    // tilePadding: EdgeInsets.all(0.0),
+                    // tilePadding: EdgeInsets.all(4.0),
                     onExpansionChanged: (expanded) => setState(() {
                       isExpanded = expanded;
                       expansionIcon = expanded
@@ -81,25 +81,35 @@ class _ProfileState extends State<Profile> {
                           : const Icon(Icons.expand_more);
                     }),
                     children: [
-                      // const SizedBox(height: 8.0),
-                      IconText(
-                        iconSpacing: 6.0,
-                        icon: Icon(Icons.email, color: Colors.green.shade200),
-                        text: "kimpas@hotmail.se",
-                      ),
-                      const SizedBox(height: 8.0),
-                      IconText(
-                        iconSpacing: 6.0,
-                        icon: Icon(Icons.phone, color: Colors.green.shade200),
-                        text: "073 268 73 75",
-                      ),
-                      const SizedBox(height: 8.0),
-                      IconText(
-                        iconSpacing: 6.0,
-                        icon: Icon(Icons.home, color: Colors.green.shade200),
-                        text: "Kanslivägen 13, 146 37 Tullinge",
-                      ),
-                      const SizedBox(height: 8.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 8.0),
+                            IconText(
+                              iconSpacing: 6.0,
+                              icon: Icon(Icons.email,
+                                  color: Colors.green.shade200),
+                              text: "kimpas@hotmail.se",
+                            ),
+                            const SizedBox(height: 8.0),
+                            IconText(
+                              iconSpacing: 6.0,
+                              icon: Icon(Icons.phone,
+                                  color: Colors.green.shade200),
+                              text: "073 268 73 75",
+                            ),
+                            const SizedBox(height: 8.0),
+                            IconText(
+                              iconSpacing: 6.0,
+                              icon: Icon(Icons.home,
+                                  color: Colors.green.shade200),
+                              text: "Kanslivägen 13, 146 37 Tullinge",
+                            ),
+                            const SizedBox(height: 8.0),
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ],

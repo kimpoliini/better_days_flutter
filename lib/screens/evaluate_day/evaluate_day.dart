@@ -128,7 +128,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                     await addDbEntry();
 
                     appState.updateEntriesAsync();
-                    Navigator.pop(context);
+                    if (context.mounted) Navigator.pop(context);
                   }
                 : null),
       ),
