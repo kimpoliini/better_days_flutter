@@ -106,7 +106,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
     String modeText =
         widget.mode == DayMode.today ? "Evaluate today" : "Evaluate day";
     bool isToday = widget.mode == DayMode.today;
-    if (isToday) _setDate(DateTime.now());
+    if (isToday) {
+      DateTime now = DateTime.now();
+      DateTime today = DateTime.parse(DateFormat("yyyy-MM-dd").format(now));
+
+      _setDate(today);
+    }
 
     var appState = context.watch<AppState>();
 
@@ -120,29 +125,9 @@ class _EvaluateDayState extends State<EvaluateDay> {
             icon: Icons.check,
             onTap: selectedDate != null
                 ? () async {
-                    final dir = await getApplicationDocumentsDirectory();
-                    final db = await Isar.open([HistoryItemSchema],
-                        directory: dir.path);
+                    await addDbEntry();
 
-                    final newEntry = HistoryItem()
-                      ..date = selectedDate!
-                      ..description = note.isEmpty ? null : note
-                      ..score = isSimpleMode
-                          ? currentSliderValue
-                          : averagePointScore(data);
-
-                    await db.writeTxn(() async {
-                      await db.historyItems.put(newEntry);
-                    });
-
-                    await db.close();
-
-                    appState.addEntry(HistoryEntry(
-                        date: selectedDate!,
-                        description: note.isEmpty ? null : note,
-                        score: isSimpleMode
-                            ? currentSliderValue
-                            : averagePointScore(data)));
+                    appState.updateEntriesAsync();
                     Navigator.pop(context);
                   }
                 : null),
@@ -514,6 +499,22 @@ class _EvaluateDayState extends State<EvaluateDay> {
         ),
       ),
     );
+  }
+
+  Future<void> addDbEntry() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+
+    final newEntry = HistoryItem()
+      ..date = selectedDate!
+      ..description = note.isEmpty ? null : note
+      ..score = isSimpleMode ? currentSliderValue : averagePointScore(data);
+
+    await db.writeTxn(() async {
+      await db.historyItems.put(newEntry);
+    });
+
+    await db.close();
   }
 }
 
