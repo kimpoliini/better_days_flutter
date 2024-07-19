@@ -3,10 +3,13 @@ import 'dart:math';
 
 import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
+import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:better_days_flutter/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:collection/collection.dart';
@@ -116,7 +119,24 @@ class _EvaluateDayState extends State<EvaluateDay> {
             text: "Done",
             icon: Icons.check,
             onTap: selectedDate != null
-                ? () {
+                ? () async {
+                    final dir = await getApplicationDocumentsDirectory();
+                    final db = await Isar.open([HistoryItemSchema],
+                        directory: dir.path);
+
+                    final newEntry = HistoryItem()
+                      ..date = selectedDate!
+                      ..description = note.isEmpty ? null : note
+                      ..score = isSimpleMode
+                          ? currentSliderValue
+                          : averagePointScore(data);
+
+                    await db.writeTxn(() async {
+                      await db.historyItems.put(newEntry);
+                    });
+
+                    await db.close();
+
                     appState.addEntry(HistoryEntry(
                         date: selectedDate!,
                         description: note.isEmpty ? null : note,

@@ -2,10 +2,13 @@ import 'dart:developer';
 
 import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
+import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:better_days_flutter/widgets/history_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class History extends StatelessWidget {
@@ -63,6 +66,19 @@ class History extends StatelessWidget {
     //         child: HistoryCard(entry: entry))
     // ];
 
+    // return FutureBuilder(
+    //     future: getHistoryEntries(),
+    //     builder: (BuildContext context,
+    //         AsyncSnapshot<List<HistoryItem>> historyEntriesSnapshot) {
+    //       Widget widget;
+    //       if (historyEntriesSnapshot.data != null) {
+    //         widget = Text(historyEntriesSnapshot.data!.length.toString());
+    //       } else {
+    //         widget = const Text(":(");
+    //       }
+
+    //       return widget;
+    // });
     return state.historyEntries.isNotEmpty
         ? ListView.builder(
             itemCount: items.length,
@@ -72,6 +88,7 @@ class History extends StatelessWidget {
             },
           )
         : const Center(child: Text("No entries yet"));
+    // }
   }
 }
 
