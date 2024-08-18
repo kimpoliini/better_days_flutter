@@ -1,4 +1,3 @@
-import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../states/history_state.dart';
 import '../widgets/evaluate_day_button.dart';
 
 class ChartData {
@@ -19,7 +19,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<AppState>();
+    var state = context.watch<HistoryState>();
     var hasEvaluatedToday = DateFormat.yMd().format(DateTime.now()) ==
         DateFormat.yMd().format(state.historyEntries.isNotEmpty
             ? state.historyEntries.first.date
@@ -128,7 +128,7 @@ class PastWeekChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var entries = context.watch<AppState>().historyEntries;
+    var entries = context.watch<HistoryState>().historyEntries;
     var thisWeekEntries = entries
         .getRange(0, entries.length >= 7 ? 7 : entries.length)
         .toList()

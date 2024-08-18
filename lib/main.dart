@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:better_days_flutter/screens/settings.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/history.dart';
 import 'package:better_days_flutter/screens/profile.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,8 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'screens/home.dart';
 import 'package:provider/provider.dart';
+
+import 'states/history_state.dart';
 
 void main() => runApp(const MainApp());
 
@@ -21,7 +22,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) {
-        var state = AppState();
+        var state = HistoryState();
         state.updateEntriesAsync();
         return state;
       },
@@ -46,60 +47,6 @@ class MainApp extends StatelessWidget {
                 ColorScheme.fromSeed(seedColor: Colors.green.shade200)),
       ),
     );
-  }
-}
-
-class AppState extends ChangeNotifier {
-  bool fixed = false;
-  String appBarTitle = "Overview";
-
-  var historyEntries = <HistoryEntry>[
-    //Mock initialize history entries
-
-    // for (int i = 0; i < 200; i++)
-    //   HistoryEntry(
-    //       date: DateTime(now.year, now.month, now.day)
-    //           .subtract(Duration(days: (i + 1) * 2)),
-    //       score:
-    //           double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
-  ];
-
-  void updateEntriesAsync() async {
-    var newItems = await getHistoryItems();
-
-    historyEntries = newItems
-        .map((e) => HistoryEntry(
-            date: e.date!, description: e.description, score: e.score))
-        .toList();
-    log("updated entries");
-    notifyListeners();
-  }
-
-  // void addEntry(HistoryEntry entry) {
-  //   var dateOnly = DateTime(entry.date.year, entry.date.month, entry.date.day);
-  //   entry.date = dateOnly;
-
-  //   historyEntries.add(entry);
-
-  //   historyEntries.sort((a, b) => b.date.compareTo(a.date));
-  //   notifyListeners();
-  // }
-
-  void removeEntry(HistoryEntry entry) {
-    if (historyEntries.contains(entry)) historyEntries.remove(entry);
-  }
-
-  void fixEntries() {
-    if (!fixed) {
-      for (var element in historyEntries) {
-        var hour = element.date.hour;
-        if (hour != 0) {
-          element.date = element.date.add(Duration(hours: 24 - hour));
-        }
-      }
-    }
-    fixed = true;
-    log("fixed");
   }
 }
 
@@ -140,7 +87,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<AppState>();
+    var state = context.watch<HistoryState>();
 
     state.fixEntries();
 
@@ -230,7 +177,7 @@ Future<void> _showDeleteDialog(BuildContext context) async {
               await deleteHistoryItems();
 
               if (context.mounted) {
-                Provider.of<AppState>(context, listen: false)
+                Provider.of<HistoryState>(context, listen: false)
                     .updateEntriesAsync();
                 Navigator.of(context).pop();
               }

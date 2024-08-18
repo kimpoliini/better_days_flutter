@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../states/history_state.dart';
 import '../../widgets/evaluate_day_button.dart';
 import '../../widgets/rounded_button.dart';
 
@@ -109,7 +109,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
       _setDate(today);
     }
 
-    var appState = context.watch<AppState>();
+    var appState = context.watch<HistoryState>();
 
     return Scaffold(
       appBar: AppBar(title: Text(modeText)),
@@ -198,267 +198,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                       const SizedBox(
                         height: 8,
                       ),
-                      isSimpleMode
-                          //Simple mode
-                          ? Column(
-                              children: [
-                                Slider(
-                                    activeColor: Colors.green.shade200,
-                                    thumbColor: Colors.green.shade200,
-                                    label:
-                                        currentSliderValue.round().toString(),
-                                    min: 0,
-                                    max: 10,
-                                    divisions: 10,
-                                    value: currentSliderValue,
-                                    onChanged: ((double value) => setState(() {
-                                          currentSliderValue = value;
-                                        }))),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                const Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("Bad"),
-                                    Text("Decent"),
-                                    Text("Great"),
-                                  ],
-                                ),
-                              ],
-                            )
-                          //Advanced mode
-                          : Column(children: [
-                              Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        "Hint: Press the graph to create a point\nDrag a point below the graph to delete it",
-                                        style: TextStyle(
-                                          fontSize: 12.0,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-                                    ),
-                                    //Reset button
-                                    Card(
-                                      child: InkWell(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(12.0)),
-                                        onTap: () {
-                                          _removeAllPoints();
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Icon(
-                                            Icons.autorenew,
-                                            size: 32.0,
-                                            color: Colors.green.shade200,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ]),
-                              // Row(children: [
-                              //   Text(
-                              //       "About what time did you wake up ${isToday ? "today" : "this day"}?"),
-                              //   const Text("10"),
-                              // ]),
-                              // const SizedBox(height: 16.0),
-                              SfCartesianChart(
-                                  onChartTouchInteractionDown: (tapArgs) {
-                                    final Offset value = Offset(
-                                        tapArgs.position.dx,
-                                        tapArgs.position.dy);
-                                    final CartesianChartPoint<dynamic>
-                                        chartPoint =
-                                        seriesController!.pixelToPoint(value);
-
-                                    var x = (chartPoint.x as double).toInt();
-                                    double y = chartPoint.y;
-                                    y = (y * 2).round() / 2;
-
-                                    // DayScoreEntry? point =
-                                    //     data.firstWhereOrNull((e) {
-                                    //   var dx = 0.5, dy = 0.5;
-
-                                    //   return (chartPoint.x > 23.25
-                                    //           ? (e.x == 24)
-                                    //           : (x - dx < e.x + dx &&
-                                    //               x + dx > e.x - dx)) &&
-                                    //       (y - dy < e.y + dy &&
-                                    //           y + dy > e.y - dy);
-                                    // });
-
-                                    //Gets a list of valid points to be moved
-                                    //when pressing the graph
-                                    List<DayScoreEntry> validPoints =
-                                        data.where((e) {
-                                      var dx = 1, dy = 0.5;
-
-                                      return (chartPoint.x > 23.25
-                                              ? (e.x == 24)
-                                              : (x - dx < e.x + dx &&
-                                                  x + dx > e.x - dx)) &&
-                                          (y - dy < e.y + dy &&
-                                              y + dy > e.y - dy);
-                                    }).toList();
-
-                                    //Get differences between
-                                    //press and point positions
-                                    List<double> diffs = validPoints
-                                        .map((e) => e.x > chartPoint.x
-                                            ? (e.x - chartPoint.x) as double
-                                            : (chartPoint.x - e.x) as double)
-                                        .toList();
-
-                                    //Get index of nearest point
-                                    DayScoreEntry? nearestPoint = validPoints
-                                            .isNotEmpty
-                                        ? validPoints[
-                                            diffs.indexOf(diffs.reduce(min))]
-                                        : null;
-
-                                    int? pointId;
-                                    pointId = nearestPoint != null
-                                        ? data.indexOf(nearestPoint)
-                                        : -1;
-
-                                    if (pointId >= 0) {
-                                      selectedPointId = pointId;
-                                      _setPauseScroll(true);
-                                      data[selectedPointId].color =
-                                          Colors.green;
-                                    }
-                                  },
-                                  //On move interaction
-                                  onChartTouchInteractionMove: (tapArgs) {
-                                    final Offset value = Offset(
-                                        tapArgs.position.dx,
-                                        tapArgs.position.dy);
-                                    final CartesianChartPoint<dynamic>
-                                        chartPoint =
-                                        seriesController!.pixelToPoint(value);
-
-                                    double y = chartPoint.y;
-                                    y = (y * 2).round() / 2;
-
-                                    //Makes sure points never go below 0 or above 10
-                                    //Maybe move most of this to _updatePoint()?
-                                    if (selectedPointId != -1) {
-                                      if (y < 0 &&
-                                          data[selectedPointId].y != 0) {
-                                        _updatePoint(selectedPointId, 0);
-                                      } else if (y >= 10 &&
-                                          data[selectedPointId].y != 10) {
-                                        _updatePoint(selectedPointId, 10);
-                                      } else if (y <= 10 && y > 0) {
-                                        _updatePoint(selectedPointId, y);
-                                      }
-                                      //Deleting a point
-                                      if (y < -2 &&
-                                          canVibrate &&
-                                          data[selectedPointId].x != 24 &&
-                                          data[selectedPointId].x != 0) {
-                                        canVibrate = false;
-                                        _updatePoint(selectedPointId, 0,
-                                            color: Colors.red);
-                                        lightVibration();
-                                      } else if (y > -2 && !canVibrate) {
-                                        canVibrate = true;
-                                        if (data[selectedPointId].color !=
-                                            Colors.green) {
-                                          _updatePoint(selectedPointId,
-                                              data[selectedPointId].y,
-                                              color: Colors.green);
-                                        }
-                                      }
-                                    }
-                                  },
-                                  //On up interaction
-                                  onChartTouchInteractionUp: (tapArgs) {
-                                    final Offset value = Offset(
-                                        tapArgs.position.dx,
-                                        tapArgs.position.dy);
-
-                                    final CartesianChartPoint<dynamic>
-                                        chartPoint =
-                                        seriesController!.pixelToPoint(value);
-
-                                    var x = (chartPoint.x as double).toInt();
-                                    double y = chartPoint.y;
-                                    y = (y * 2).round() / 2;
-
-                                    if (x > 0 &&
-                                        x < 24 &&
-                                        y > 0 &&
-                                        y <= 10 &&
-                                        !data.any((e) => e.x == x) &&
-                                        selectedPointId == -1 &&
-                                        canPlacePoint) {
-                                      _addPoint(DayScoreEntry(x, y));
-                                    } else if (selectedPointId != -1 &&
-                                        y < -2 &&
-                                        data[selectedPointId].x != 24 &&
-                                        data[selectedPointId].x != 0) {
-                                      _removePoint(selectedPointId);
-                                    } else if (selectedPointId != -1) {
-                                      data[selectedPointId].color = Colors.blue;
-                                    }
-
-                                    selectedPointId = -1;
-                                    _setPauseScroll(false);
-                                  },
-                                  series: <CartesianSeries>[
-                                    SplineAreaSeries<DayScoreEntry, int>(
-                                        splineType: SplineType.monotonic,
-                                        onRendererCreated: (controller) {
-                                          seriesController = controller;
-                                        },
-                                        color: Colors.blue.withOpacity(0.5),
-                                        animationDuration: 0,
-                                        borderWidth: 6,
-                                        borderColor: Colors.blue.shade500,
-                                        dataSource: data,
-                                        xValueMapper: (DayScoreEntry data, _) =>
-                                            data.x,
-                                        yValueMapper: (DayScoreEntry data, _) =>
-                                            data.y),
-                                    SplineSeries<DayScoreEntry, int>(
-                                        animationDuration: 0,
-                                        splineType: SplineType.monotonic,
-                                        width: 0.0,
-                                        markerSettings: const MarkerSettings(
-                                          borderWidth: 8,
-                                          borderColor: Colors.black,
-                                          color: Colors.blue,
-                                          isVisible: true,
-                                        ),
-                                        pointColorMapper:
-                                            (DayScoreEntry data, _) =>
-                                                data.color,
-                                        dataSource: data,
-                                        xValueMapper: (DayScoreEntry data, _) =>
-                                            data.x,
-                                        yValueMapper: (DayScoreEntry data, _) =>
-                                            data.y),
-                                  ],
-                                  primaryXAxis: NumericAxis(
-                                      minimum: 0,
-                                      maximum: 24,
-                                      interval: 6,
-                                      axisLabelFormatter:
-                                          (AxisLabelRenderDetails details) =>
-                                              timeAxis(details)),
-                                  primaryYAxis: NumericAxis(
-                                    minimum: 0,
-                                    maximum: 10,
-                                    interval: 2,
-                                  )),
-                            ])
+                      isSimpleMode ? simpleModeLayout() : advancedModeLayout()
                     ],
                   ),
                 ),
@@ -495,6 +235,238 @@ class _EvaluateDayState extends State<EvaluateDay> {
         ),
       ),
     );
+  }
+
+  Column simpleModeLayout() {
+    return Column(
+      children: [
+        Slider(
+            activeColor: Colors.green.shade200,
+            thumbColor: Colors.green.shade200,
+            label: currentSliderValue.round().toString(),
+            min: 0,
+            max: 10,
+            divisions: 10,
+            value: currentSliderValue,
+            onChanged: ((double value) => setState(() {
+                  currentSliderValue = value;
+                }))),
+        const SizedBox(
+          height: 4,
+        ),
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Bad"),
+            Text("Decent"),
+            Text("Great"),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Column advancedModeLayout() {
+    return Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Flexible(
+          child: Text(
+            "Hint: Press the graph to create a point\nDrag a point below the graph to delete it",
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ),
+        //Reset button
+        Card(
+          child: InkWell(
+            borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+            onTap: () {
+              _removeAllPoints();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(
+                Icons.autorenew,
+                size: 32.0,
+                color: Colors.green.shade200,
+              ),
+            ),
+          ),
+        )
+      ]),
+      // Row(children: [
+      //   Text(
+      //       "About what time did you wake up ${isToday ? "today" : "this day"}?"),
+      //   const Text("10"),
+      // ]),
+      // const SizedBox(height: 16.0),
+      SfCartesianChart(
+          onChartTouchInteractionDown: (tapArgs) {
+            final Offset value =
+                Offset(tapArgs.position.dx, tapArgs.position.dy);
+            final CartesianChartPoint<dynamic> chartPoint =
+                seriesController!.pixelToPoint(value);
+
+            var x = (chartPoint.x as double).toInt();
+            double y = chartPoint.y;
+            y = (y * 2).round() / 2;
+
+            // DayScoreEntry? point =
+            //     data.firstWhereOrNull((e) {
+            //   var dx = 0.5, dy = 0.5;
+
+            //   return (chartPoint.x > 23.25
+            //           ? (e.x == 24)
+            //           : (x - dx < e.x + dx &&
+            //               x + dx > e.x - dx)) &&
+            //       (y - dy < e.y + dy &&
+            //           y + dy > e.y - dy);
+            // });
+
+            //Gets a list of valid points to be moved
+            //when pressing the graph
+            List<DayScoreEntry> validPoints = data.where((e) {
+              var dx = 1, dy = 0.5;
+
+              return (chartPoint.x > 23.25
+                      ? (e.x == 24)
+                      : (x - dx < e.x + dx && x + dx > e.x - dx)) &&
+                  (y - dy < e.y + dy && y + dy > e.y - dy);
+            }).toList();
+
+            //Get differences between
+            //press and point positions
+            List<double> diffs = validPoints
+                .map((e) => e.x > chartPoint.x
+                    ? (e.x - chartPoint.x) as double
+                    : (chartPoint.x - e.x) as double)
+                .toList();
+
+            //Get index of nearest point
+            DayScoreEntry? nearestPoint = validPoints.isNotEmpty
+                ? validPoints[diffs.indexOf(diffs.reduce(min))]
+                : null;
+
+            int? pointId;
+            pointId = nearestPoint != null ? data.indexOf(nearestPoint) : -1;
+
+            if (pointId >= 0) {
+              selectedPointId = pointId;
+              _setPauseScroll(true);
+              data[selectedPointId].color = Colors.green;
+            }
+          },
+          //On move interaction
+          onChartTouchInteractionMove: (tapArgs) {
+            final Offset value =
+                Offset(tapArgs.position.dx, tapArgs.position.dy);
+            final CartesianChartPoint<dynamic> chartPoint =
+                seriesController!.pixelToPoint(value);
+
+            double y = chartPoint.y;
+            y = (y * 2).round() / 2;
+
+            //Makes sure points never go below 0 or above 10
+            //Maybe move most of this to _updatePoint()?
+            if (selectedPointId != -1) {
+              if (y < 0 && data[selectedPointId].y != 0) {
+                _updatePoint(selectedPointId, 0);
+              } else if (y >= 10 && data[selectedPointId].y != 10) {
+                _updatePoint(selectedPointId, 10);
+              } else if (y <= 10 && y > 0) {
+                _updatePoint(selectedPointId, y);
+              }
+              //Deleting a point
+              if (y < -2 &&
+                  canVibrate &&
+                  data[selectedPointId].x != 24 &&
+                  data[selectedPointId].x != 0) {
+                canVibrate = false;
+                _updatePoint(selectedPointId, 0, color: Colors.red);
+                lightVibration();
+              } else if (y > -2 && !canVibrate) {
+                canVibrate = true;
+                if (data[selectedPointId].color != Colors.green) {
+                  _updatePoint(selectedPointId, data[selectedPointId].y,
+                      color: Colors.green);
+                }
+              }
+            }
+          },
+          //On up interaction
+          onChartTouchInteractionUp: (tapArgs) {
+            final Offset value =
+                Offset(tapArgs.position.dx, tapArgs.position.dy);
+
+            final CartesianChartPoint<dynamic> chartPoint =
+                seriesController!.pixelToPoint(value);
+
+            var x = (chartPoint.x as double).toInt();
+            double y = chartPoint.y;
+            y = (y * 2).round() / 2;
+
+            if (x > 0 &&
+                x < 24 &&
+                y > 0 &&
+                y <= 10 &&
+                !data.any((e) => e.x == x) &&
+                selectedPointId == -1 &&
+                canPlacePoint) {
+              _addPoint(DayScoreEntry(x, y));
+            } else if (selectedPointId != -1 &&
+                y < -2 &&
+                data[selectedPointId].x != 24 &&
+                data[selectedPointId].x != 0) {
+              _removePoint(selectedPointId);
+            } else if (selectedPointId != -1) {
+              data[selectedPointId].color = Colors.blue;
+            }
+
+            selectedPointId = -1;
+            _setPauseScroll(false);
+          },
+          series: <CartesianSeries>[
+            SplineAreaSeries<DayScoreEntry, int>(
+                splineType: SplineType.monotonic,
+                onRendererCreated: (controller) {
+                  seriesController = controller;
+                },
+                color: Colors.blue.withOpacity(0.5),
+                animationDuration: 0,
+                borderWidth: 6,
+                borderColor: Colors.blue.shade500,
+                dataSource: data,
+                xValueMapper: (DayScoreEntry data, _) => data.x,
+                yValueMapper: (DayScoreEntry data, _) => data.y),
+            SplineSeries<DayScoreEntry, int>(
+                animationDuration: 0,
+                splineType: SplineType.monotonic,
+                width: 0.0,
+                markerSettings: const MarkerSettings(
+                  borderWidth: 8,
+                  borderColor: Colors.black,
+                  color: Colors.blue,
+                  isVisible: true,
+                ),
+                pointColorMapper: (DayScoreEntry data, _) => data.color,
+                dataSource: data,
+                xValueMapper: (DayScoreEntry data, _) => data.x,
+                yValueMapper: (DayScoreEntry data, _) => data.y),
+          ],
+          primaryXAxis: NumericAxis(
+              minimum: 0,
+              maximum: 24,
+              interval: 6,
+              axisLabelFormatter: (AxisLabelRenderDetails details) =>
+                  timeAxis(details)),
+          primaryYAxis: NumericAxis(
+            minimum: 0,
+            maximum: 10,
+            interval: 2,
+          )),
+    ]);
   }
 
   Future<void> addDbEntry() async {
