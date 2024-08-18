@@ -10,4 +10,13 @@ class User {
   String? lastName;
 
   DateTime? birthday;
+  DateTime joined = DateTime.now();
+
+  //Additional
+  String? motto;
+  String? email;
+  String? phone;
+  String? address;
+  List<String>? medication;
+  List<String>? links;
 }

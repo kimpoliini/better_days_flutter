@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:better_days_flutter/main.dart';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';

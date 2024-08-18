@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:better_days_flutter/widgets/icon_text.dart';
 import 'package:flutter/material.dart';
 

@@ -1,10 +1,7 @@
-import 'dart:developer' as dev;
 import 'dart:math';
 
 import 'package:better_days_flutter/main.dart';
-import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/schemas/history_item.dart';
-import 'package:better_days_flutter/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -12,7 +9,6 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:collection/collection.dart';
 
 import '../../widgets/evaluate_day_button.dart';
 import '../../widgets/rounded_button.dart';

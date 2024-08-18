@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:better_days_flutter/screens/settings.dart';
@@ -13,10 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'screens/home.dart';
 import 'package:provider/provider.dart';
 
-var now = DateTime.now();
-void main() {
-  runApp(const MainApp());
-}
+void main() => runApp(const MainApp());
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -75,23 +71,19 @@ class AppState extends ChangeNotifier {
         .map((e) => HistoryEntry(
             date: e.date!, description: e.description, score: e.score))
         .toList();
-    // for (var he in historyEntries) {
-    //   log(he.date.toString());
-    // }
     log("updated entries");
-
     notifyListeners();
   }
 
-  void addEntry(HistoryEntry entry) {
-    var dateOnly = DateTime(entry.date.year, entry.date.month, entry.date.day);
-    entry.date = dateOnly;
+  // void addEntry(HistoryEntry entry) {
+  //   var dateOnly = DateTime(entry.date.year, entry.date.month, entry.date.day);
+  //   entry.date = dateOnly;
 
-    historyEntries.add(entry);
+  //   historyEntries.add(entry);
 
-    historyEntries.sort((a, b) => b.date.compareTo(a.date));
-    notifyListeners();
-  }
+  //   historyEntries.sort((a, b) => b.date.compareTo(a.date));
+  //   notifyListeners();
+  // }
 
   void removeEntry(HistoryEntry entry) {
     if (historyEntries.contains(entry)) historyEntries.remove(entry);
