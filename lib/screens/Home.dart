@@ -2,16 +2,14 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:better_days_flutter/models/history_entry.dart';
+import 'package:better_days_flutter/models/main_chart_data.dart';
 import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
+import 'package:better_days_flutter/states/app_state.dart';
+import 'package:better_days_flutter/widgets/evaluate_day_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-
-import '../models/main_chart_data.dart';
-import '../states/history_state.dart';
-import '../widgets/evaluate_day_button.dart';
 
 class FutureHome extends StatefulWidget {
   const FutureHome({super.key});
@@ -25,8 +23,9 @@ class _FutureHomeState extends State<FutureHome> {
   bool hasEvaluatedToday = false;
 
   Future<bool> _checkData(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    name = prefs.getString("firstName") ?? "null";
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // name = prefs.getString("firstName") ?? "null";
+    name = context.watch<AppState>().user.firstName ?? "null";
 
     hasEvaluatedToday = await getMostRecentHistoryItem().then((day) {
       if (day != null) {
@@ -50,6 +49,7 @@ class _FutureHomeState extends State<FutureHome> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: layout(context));
           } else if (snapshot.hasError) {
+            log(snapshot.error.toString());
             return Text(":(");
           } else {
             return CircularProgressIndicator();
@@ -58,7 +58,7 @@ class _FutureHomeState extends State<FutureHome> {
   }
 
   ListView layout(BuildContext context) {
-    // var state = context.watch<HistoryState>();
+    // var state = context.watch<AppState>();
 
     return ListView(
       children: [
@@ -246,7 +246,7 @@ class PastWeekChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var entries = context.watch<HistoryState>().historyEntries;
+    var entries = context.watch<AppState>().historyEntries;
     var thisWeekEntries = entries
         .getRange(0, entries.length >= 7 ? 7 : entries.length)
         .toList()

@@ -181,7 +181,7 @@ User _userDeserialize(
   object.email = reader.readStringOrNull(offsets[2]);
   object.firstName = reader.readStringOrNull(offsets[3]);
   object.id = id;
-  object.joined = reader.readDateTime(offsets[4]);
+  object.joined = reader.readDateTimeOrNull(offsets[4]);
   object.lastName = reader.readStringOrNull(offsets[5]);
   object.links = reader.readStringList(offsets[6]);
   object.medication = reader.readStringList(offsets[7]);
@@ -206,7 +206,7 @@ P _userDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
@@ -865,8 +865,24 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
+  QueryBuilder<User, User, QAfterFilterCondition> joinedIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'joined',
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> joinedIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'joined',
+      ));
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition> joinedEqualTo(
-      DateTime value) {
+      DateTime? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'joined',
@@ -876,7 +892,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }
 
   QueryBuilder<User, User, QAfterFilterCondition> joinedGreaterThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -889,7 +905,7 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }
 
   QueryBuilder<User, User, QAfterFilterCondition> joinedLessThan(
-    DateTime value, {
+    DateTime? value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -902,8 +918,8 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
   }
 
   QueryBuilder<User, User, QAfterFilterCondition> joinedBetween(
-    DateTime lower,
-    DateTime upper, {
+    DateTime? lower,
+    DateTime? upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -2124,7 +2140,7 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
     });
   }
 
-  QueryBuilder<User, DateTime, QQueryOperations> joinedProperty() {
+  QueryBuilder<User, DateTime?, QQueryOperations> joinedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'joined');
     });

@@ -1,13 +1,17 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/schemas/history_item.dart';
+import 'package:better_days_flutter/schemas/user.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HistoryState extends ChangeNotifier {
+class AppState extends ChangeNotifier {
   bool fixed = false;
   String appBarTitle = "Overview";
+  User user = User();
 
   var historyEntries = <HistoryEntry>[
     //Mock initialize history entries
@@ -20,12 +24,13 @@ class HistoryState extends ChangeNotifier {
     //           double.parse((Random().nextDouble() * 9 + 1).toStringAsFixed(1)))
   ];
 
-  HistoryState() {
-    updateEntriesAsync();
+  AppState() {
+    updateUser();
+    updateHistoryEntries();
     fixEntries();
   }
 
-  void updateEntriesAsync() async {
+  void updateHistoryEntries() async {
     var newItems = await getHistoryItems();
 
     historyEntries = newItems
@@ -67,36 +72,59 @@ class HistoryState extends ChangeNotifier {
     // notifyListeners();
     // log("fixed");
   }
+
+  void updateUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    User newUser = User();
+
+    newUser.firstName = prefs.getString("firstName") ?? "null";
+    newUser.lastName = prefs.getString("lastName") ?? "";
+
+    String? birthdayString = prefs.getString("birthday");
+    if (birthdayString != null) {
+      newUser.birthday = DateTime.tryParse(birthdayString);
+    }
+
+    String? joinedString = prefs.getString("joinedDate");
+    if (joinedString != null) {
+      newUser.joined = DateTime.tryParse(joinedString);
+    }
+
+    user = newUser;
+  }
 }
 
 Future<HistoryItem?> getMostRecentHistoryItem() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+  var db = await openHistoryDatabase();
 
   var item = await db.historyItems.where().sortByDateDesc().findFirst();
-  await db.close();
 
   return item;
 }
 
 Future<List<HistoryItem>> getHistoryItems() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+  var db = await openHistoryDatabase();
 
   var items = await db.historyItems.where().findAll();
-  await db.close();
 
   log("${items.length} items");
   return items;
 }
 
 Future<void> deleteHistoryItems() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+  var db = await openHistoryDatabase();
 
   await db.writeTxn(() async {
     await db.historyItems.where().deleteAll();
   });
+}
 
-  await db.close();
+Future<Isar> openHistoryDatabase() async {
+  Directory dir = await getApplicationDocumentsDirectory();
+
+  bool isOpen = Isar.getInstance()?.isOpen ?? false;
+
+  return isOpen
+      ? Isar.getInstance()!
+      : await Isar.open([HistoryItemSchema], directory: dir.path);
 }

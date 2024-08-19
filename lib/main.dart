@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:after_layout/after_layout.dart';
 import 'package:better_days_flutter/screens/intro.dart';
 import 'package:better_days_flutter/screens/settings.dart';
+import 'package:better_days_flutter/states/app_state.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:better_days_flutter/screens/history.dart';
 import 'package:better_days_flutter/screens/profile.dart';
@@ -11,8 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home.dart';
 import 'package:provider/provider.dart';
-
-import 'states/history_state.dart';
 
 void main() => runApp(const MainApp());
 
@@ -22,7 +21,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => HistoryState(),
+      create: (context) => AppState(),
       child: MaterialApp(
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const [
@@ -70,7 +69,7 @@ class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) => checkIntro();
-  
+
   @override
   Widget build(BuildContext context) {
     return const MainPage();
@@ -202,8 +201,8 @@ Future<void> _showDeleteDialog(BuildContext context) async {
               await deleteHistoryItems();
 
               if (context.mounted) {
-                Provider.of<HistoryState>(context, listen: false)
-                    .updateEntriesAsync();
+                Provider.of<AppState>(context, listen: false)
+                    .updateHistoryEntries();
                 Navigator.of(context).pop();
               }
             },

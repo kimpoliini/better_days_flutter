@@ -10,7 +10,7 @@ class User {
   String? lastName;
 
   DateTime? birthday;
-  DateTime joined = DateTime.now();
+  DateTime? joined;
 
   //Additional
   String? motto;
