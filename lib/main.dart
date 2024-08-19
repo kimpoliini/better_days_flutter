@@ -56,7 +56,7 @@ class Splash extends StatefulWidget {
 class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
   Future checkIntro() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasSeenIntro = (prefs.getBool("hasSeenIntro") ?? true);
+    bool hasSeenIntro = (prefs.getBool("hasSeenIntro") ?? false);
 
     if (!hasSeenIntro) {
       Navigator.of(context).pushReplacement(
@@ -126,23 +126,27 @@ class _MainPageState extends State<MainPage> {
           onDestinationSelected: _onItemTapped,
           selectedIndex: _selectedIndex,
           indicatorColor: Colors.green.shade200,
-          destinations: const <NavigationDestination>[
-            NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: "Home"),
-            NavigationDestination(
-                icon: Icon(Icons.history_outlined),
-                selectedIcon: Icon(Icons.history),
-                label: "History"),
-            NavigationDestination(
-                icon: Icon(Icons.person_outlined),
-                selectedIcon: Icon(Icons.person),
-                label: "Profile"),
-          ],
+          destinations: bottomNavBarDestinations(),
         ),
       );
     });
+  }
+
+  List<NavigationDestination> bottomNavBarDestinations() {
+    return const <NavigationDestination>[
+      NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: "Home"),
+      NavigationDestination(
+          icon: Icon(Icons.history_outlined),
+          selectedIcon: Icon(Icons.history),
+          label: "History"),
+      NavigationDestination(
+          icon: Icon(Icons.person_outlined),
+          selectedIcon: Icon(Icons.person),
+          label: "Profile"),
+    ];
   }
 }
 
@@ -164,9 +168,12 @@ List<Widget>? getCurrentTabActions(BuildContext context, int index) {
     case 1:
       actions = <Widget>[
         IconButton(
-          onPressed: () => {_showDeleteDialog(context)},
+          onPressed: () => {_showDeleteEntriesDialog(context)},
           icon: const Icon(Icons.delete_sweep),
-        )
+        ),
+        IconButton(
+            onPressed: () => {_showDeletePrefsDialog(context)},
+            icon: const Icon(Icons.delete_forever))
       ];
       break;
     default:
@@ -176,7 +183,7 @@ List<Widget>? getCurrentTabActions(BuildContext context, int index) {
   return actions;
 }
 
-Future<void> _showDeleteDialog(BuildContext context) async {
+Future<void> _showDeleteEntriesDialog(BuildContext context) async {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
@@ -203,6 +210,42 @@ Future<void> _showDeleteDialog(BuildContext context) async {
               if (context.mounted) {
                 Provider.of<AppState>(context, listen: false)
                     .updateHistoryEntries();
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> _showDeletePrefsDialog(BuildContext context) async {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Clear SharedPreferences'),
+        content: const SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Remove saved SharedPreferences?'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              }),
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () async {
+              await deleteSharedPreferences();
+
+              if (context.mounted) {
+                Provider.of<AppState>(context, listen: false).updateUser();
                 Navigator.of(context).pop();
               }
             },

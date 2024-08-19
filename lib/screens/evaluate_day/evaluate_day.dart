@@ -123,7 +123,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                     await addDbEntry();
 
                     appState.updateHistoryEntries();
-                    if (context.mounted) Navigator.pop(context);
+                    // if (context.mounted)
+                    Navigator.pop(context);
                   }
                 : null),
       ),
@@ -469,8 +470,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
   }
 
   Future<void> addDbEntry() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final db = await Isar.open([HistoryItemSchema], directory: dir.path);
+    Isar db = await openHistoryDatabase();
 
     final newEntry = HistoryItem()
       ..date = selectedDate!
@@ -480,8 +480,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
     await db.writeTxn(() async {
       await db.historyItems.put(newEntry);
     });
-
-    await db.close();
   }
 }
 

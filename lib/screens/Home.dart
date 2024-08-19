@@ -11,6 +11,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+bool hasLoaded = false;
+
 class FutureHome extends StatefulWidget {
   const FutureHome({super.key});
 
@@ -23,8 +25,6 @@ class _FutureHomeState extends State<FutureHome> {
   bool hasEvaluatedToday = false;
 
   Future<bool> _checkData(BuildContext context) async {
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // name = prefs.getString("firstName") ?? "null";
     name = context.watch<AppState>().user.firstName ?? "null";
 
     hasEvaluatedToday = await getMostRecentHistoryItem().then((day) {
@@ -36,6 +36,7 @@ class _FutureHomeState extends State<FutureHome> {
       }
     });
 
+    // hasLoaded = true;
     return true;
   }
 
@@ -44,22 +45,20 @@ class _FutureHomeState extends State<FutureHome> {
     return FutureBuilder(
         future: _checkData(context),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData || hasLoaded) {
             return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: layout(context));
           } else if (snapshot.hasError) {
             log(snapshot.error.toString());
-            return Text(":(");
+            return const Text(":(");
           } else {
-            return CircularProgressIndicator();
+            return const Center(child: null);
           }
         });
   }
 
   ListView layout(BuildContext context) {
-    // var state = context.watch<AppState>();
-
     return ListView(
       children: [
         Padding(
@@ -89,12 +88,14 @@ class _FutureHomeState extends State<FutureHome> {
                         : "Evaluate your day",
                     icon: hasEvaluatedToday ? null : Icons.keyboard_arrow_right,
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const EvaluateDay(
-                                    mode: DayMode.today,
-                                  )));
+                      if (!hasEvaluatedToday) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const EvaluateDay(
+                                      mode: DayMode.today,
+                                    )));
+                      }
                     },
                   ),
                 ),

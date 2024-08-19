@@ -97,9 +97,15 @@ class AppState extends ChangeNotifier {
 Future<HistoryItem?> getMostRecentHistoryItem() async {
   var db = await openHistoryDatabase();
 
-  var item = await db.historyItems.where().sortByDateDesc().findFirst();
-
-  return item;
+  var count = await db.historyItems.count();
+  if (count > 0) {
+    log("$count history entries");
+    var item = await db.historyItems.where().sortByDateDesc().findFirst();
+    return item;
+  } else {
+    log("history entries is empy");
+    return null;
+  }
 }
 
 Future<List<HistoryItem>> getHistoryItems() async {
@@ -127,4 +133,10 @@ Future<Isar> openHistoryDatabase() async {
   return isOpen
       ? Isar.getInstance()!
       : await Isar.open([HistoryItemSchema], directory: dir.path);
+}
+
+Future<void> deleteSharedPreferences() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+  log("Cleared SharedPreferences");
 }
