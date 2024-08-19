@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/models/main_chart_data.dart';
@@ -7,6 +8,7 @@ import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:better_days_flutter/widgets/evaluate_day_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -227,16 +229,7 @@ class MainGraphCard extends StatelessWidget {
     return const Card(
       child: Padding(
         padding: EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text("Past week"),
-            SizedBox(
-              height: 16,
-            ),
-            PastWeekChart(),
-          ],
-        ),
+        child: PastWeekChart(),
       ),
     );
   }
@@ -266,13 +259,49 @@ class PastWeekChart extends StatelessWidget {
 
       data.add(MainChartData(i + 1, what?.score));
     }
-    bool hasData = data.fold(0.0, (prev, e) => prev + (e.y ?? 0)) > 0;
 
+    bool hasData = data.fold(0.0, (prev, e) => prev + (e.y ?? 0)) > 0;
+    double blur = hasData ? 0.0 : 2.0;
+
+    List<Widget> stackChildren = <Widget>[
+      ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Past week"),
+            const SizedBox(
+              height: 16,
+            ),
+            mainChart(hasData, data),
+          ],
+        ),
+      )
+    ];
+    if (!hasData) {
+      stackChildren.add(Positioned.fill(
+          child: Center(
+        child: Card(
+            child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(
+            "No data yet\n\nGet started by\nevaluating your day!",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16.0, color: Colors.grey.shade600),
+          ),
+        )),
+      )));
+    }
+    return Stack(children: stackChildren);
+  }
+
+  SfCartesianChart mainChart(bool hasData, List<MainChartData> data) {
     return SfCartesianChart(
       series: <CartesianSeries>[
         SplineSeries<MainChartData, int>(
-            animationDuration: 500,
-            splineType: SplineType.monotonic,
+            cardinalSplineTension: 0.75,
+            animationDuration: 0,
+            splineType: SplineType.cardinal,
             markerSettings: MarkerSettings(
                 borderWidth: 0,
                 height: 20,
