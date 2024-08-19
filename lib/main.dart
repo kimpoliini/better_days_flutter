@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
+import 'package:after_layout/after_layout.dart';
 import 'package:better_days_flutter/schemas/history_item.dart';
+import 'package:better_days_flutter/screens/intro.dart';
 import 'package:better_days_flutter/screens/settings.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:better_days_flutter/screens/history.dart';
@@ -8,6 +11,7 @@ import 'package:better_days_flutter/screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home.dart';
 import 'package:provider/provider.dart';
 
@@ -33,7 +37,7 @@ class MainApp extends StatelessWidget {
           Locale('se', 'SV'),
         ],
         title: "Better Days",
-        home: const MainPage(),
+        home: const Splash(),
         theme: ThemeData(
             dividerColor: Colors.transparent,
             //Fixes InkWell being stuck in a highlighted state when navigating
@@ -47,6 +51,40 @@ class MainApp extends StatelessWidget {
                 ColorScheme.fromSeed(seedColor: Colors.green.shade200)),
       ),
     );
+  }
+}
+
+class Splash extends StatefulWidget {
+  const Splash({super.key});
+
+  @override
+  SplashState createState() => SplashState();
+}
+
+class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
+  Future checkIntro() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenIntro = (prefs.getBool("hasSeenIntro") ?? true);
+
+    if (!hasSeenIntro) {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Intro()));
+    } else {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainPage()));
+    }
+  }
+
+  @override
+  FutureOr<void> afterFirstLayout(BuildContext context) {
+    log("afterFirstLayout");
+    return checkIntro();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    log("build");
+    return const MainPage();
   }
 }
 
