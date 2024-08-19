@@ -2,15 +2,12 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:after_layout/after_layout.dart';
-import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:better_days_flutter/screens/intro.dart';
 import 'package:better_days_flutter/screens/settings.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:better_days_flutter/screens/history.dart';
 import 'package:better_days_flutter/screens/profile.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home.dart';
 import 'package:provider/provider.dart';
@@ -25,11 +22,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) {
-        var state = HistoryState();
-        state.updateEntriesAsync();
-        return state;
-      },
+      create: (context) => HistoryState(),
       child: MaterialApp(
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const [
@@ -76,14 +69,10 @@ class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
   }
 
   @override
-  FutureOr<void> afterFirstLayout(BuildContext context) {
-    log("afterFirstLayout");
-    return checkIntro();
-  }
-
+  FutureOr<void> afterFirstLayout(BuildContext context) => checkIntro();
+  
   @override
   Widget build(BuildContext context) {
-    log("build");
     return const MainPage();
   }
 }
@@ -100,7 +89,7 @@ class _MainPageState extends State<MainPage> {
   String _appBarTitle = "Overview";
 
   static const List<Widget> _mainPageScreens = <Widget>[
-    Home(),
+    FutureHome(),
     History(),
     Profile(),
   ];
@@ -125,9 +114,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<HistoryState>();
-
-    state.fixEntries();
+    // var state = context.watch<HistoryState>();
 
     return LayoutBuilder(builder: (context, constraints) {
       return Scaffold(
@@ -225,25 +212,4 @@ Future<void> _showDeleteDialog(BuildContext context) async {
       );
     },
   );
-}
-
-Future<void> deleteHistoryItems() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final db = await Isar.open([HistoryItemSchema], directory: dir.path);
-
-  await db.writeTxn(() async {
-    await db.historyItems.where().deleteAll();
-  });
-
-  await db.close();
-}
-
-Future<List<HistoryItem>> getHistoryItems() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final db = await Isar.open([HistoryItemSchema], directory: dir.path);
-
-  var items = await db.historyItems.where().findAll();
-  await db.close();
-
-  return items;
 }

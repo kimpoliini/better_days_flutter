@@ -1,103 +1,221 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../models/main_chart_data.dart';
 import '../states/history_state.dart';
 import '../widgets/evaluate_day_button.dart';
 
-class ChartData {
-  ChartData(this.x, this.y);
-  final int x;
-  final double? y;
+class FutureHome extends StatefulWidget {
+  const FutureHome({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _FutureHomeState();
 }
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+class _FutureHomeState extends State<FutureHome> {
+  String name = "";
+  bool hasEvaluatedToday = false;
+
+  Future<bool> _checkData(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    name = prefs.getString("firstName") ?? "null";
+
+    hasEvaluatedToday = await getMostRecentHistoryItem().then((day) {
+      if (day != null) {
+        return DateFormat.yMd().format(DateTime.now()) ==
+            DateFormat.yMd().format(day.date!);
+      } else {
+        return false;
+      }
+    });
+
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
-    var state = context.watch<HistoryState>();
-    var hasEvaluatedToday = DateFormat.yMd().format(DateTime.now()) ==
-        DateFormat.yMd().format(state.historyEntries.isNotEmpty
-            ? state.historyEntries.first.date
-            : DateTime(1900));
+    return FutureBuilder(
+        future: _checkData(context),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.hasData) {
+            return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: layout(context));
+          } else if (snapshot.hasError) {
+            return Text(":(");
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
+  }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text("Hi Kim, how was your day?",
-                style: TextStyle(
-                    color: Colors.green.shade300,
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.w300)),
-          ),
-          const MainGraphCard(),
-          const SizedBox(
-            height: 8,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // const Expanded(child: SizedBox()),
-                  Expanded(
-                    flex: 3,
-                    child: EvaluateDayButton(
-                      filled: !hasEvaluatedToday,
-                      text: hasEvaluatedToday
-                          ? "You have evaluated this day! 🎉"
-                          : "Evaluate your day",
-                      icon:
-                          hasEvaluatedToday ? null : Icons.keyboard_arrow_right,
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const EvaluateDay(
-                                      mode: DayMode.today,
-                                    )));
-                      },
-                    ),
+  ListView layout(BuildContext context) {
+    // var state = context.watch<HistoryState>();
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("Hi $name, how was your day?",
+              style: TextStyle(
+                  color: Colors.green.shade300,
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.w300)),
+        ),
+        const MainGraphCard(),
+        const SizedBox(
+          height: 8,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: EvaluateDayButton(
+                    filled: !hasEvaluatedToday,
+                    text: hasEvaluatedToday
+                        ? "You have evaluated this day! 🎉"
+                        : "Evaluate your day",
+                    icon: hasEvaluatedToday ? null : Icons.keyboard_arrow_right,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const EvaluateDay(
+                                    mode: DayMode.today,
+                                  )));
+                    },
                   ),
-                  // const Expanded(child: SizedBox()),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // const Expanded(child: SizedBox()),
-                  Expanded(
-                    flex: 3,
-                    child: EvaluateDayButton(
-                      text: "Evaluate a different day",
-                      icon: Icons.keyboard_arrow_right,
-                      filled: false,
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const EvaluateDay(mode: DayMode.otherDay)));
-                      },
-                    ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: EvaluateDayButton(
+                    text: "Evaluate a different day",
+                    icon: Icons.keyboard_arrow_right,
+                    filled: false,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const EvaluateDay(mode: DayMode.otherDay)));
+                    },
                   ),
-                  // const Expanded(child: SizedBox()),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
+}
+
+// class Home extends StatelessWidget {
+//   const Home({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     var state = context.watch<HistoryState>();
+//     var hasEvaluatedToday = DateFormat.yMd().format(DateTime.now()) ==
+//         DateFormat.yMd().format(state.historyEntries.isNotEmpty
+//             ? state.historyEntries.first.date
+//             : DateTime(1900));
+
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+//       child: layout(hasEvaluatedToday, context),
+//     );
+//   }
+
+//   ListView layout(bool hasEvaluatedToday, BuildContext context) {
+//     return ListView(
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Text("Hi Kim, how was your day?",
+//               style: TextStyle(
+//                   color: Colors.green.shade300,
+//                   fontSize: 24.0,
+//                   fontWeight: FontWeight.w300)),
+//         ),
+//         const MainGraphCard(),
+//         const SizedBox(
+//           height: 8,
+//         ),
+//         Column(
+//           crossAxisAlignment: CrossAxisAlignment.center,
+//           children: [
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Expanded(
+//                   flex: 3,
+//                   child: EvaluateDayButton(
+//                     filled: !hasEvaluatedToday,
+//                     text: hasEvaluatedToday
+//                         ? "You have evaluated this day! 🎉"
+//                         : "Evaluate your day",
+//                     icon: hasEvaluatedToday ? null : Icons.keyboard_arrow_right,
+//                     onTap: () {
+//                       Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                               builder: (context) => const EvaluateDay(
+//                                     mode: DayMode.today,
+//                                   )));
+//                     },
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Expanded(
+//                   flex: 3,
+//                   child: EvaluateDayButton(
+//                     text: "Evaluate a different day",
+//                     icon: Icons.keyboard_arrow_right,
+//                     filled: false,
+//                     onTap: () {
+//                       Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                               builder: (context) =>
+//                                   const EvaluateDay(mode: DayMode.otherDay)));
+//                     },
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+// }
+
+bool hasEvaluatedToday(List<HistoryEntry> entries) {
+  return DateFormat.yMd().format(DateTime.now()) ==
+      DateFormat.yMd()
+          .format(entries.isNotEmpty ? entries.first.date : DateTime(1900));
 }
 
 class MainGraphCard extends StatelessWidget {
@@ -135,7 +253,7 @@ class PastWeekChart extends StatelessWidget {
         .reversed
         .toList();
 
-    List<ChartData> data = <ChartData>[];
+    List<MainChartData> data = <MainChartData>[];
 
     for (var i = 0; i < 7; i++) {
       var date = DateFormat.yMd()
@@ -145,13 +263,13 @@ class PastWeekChart extends StatelessWidget {
           .where((e) => DateFormat.yMd().format(e.date) == date)
           .firstOrNull;
 
-      data.add(ChartData(i + 1, what?.score));
+      data.add(MainChartData(i + 1, what?.score));
     }
     bool hasData = data.fold(0.0, (prev, e) => prev + (e.y ?? 0)) > 0;
 
     return SfCartesianChart(
       series: <CartesianSeries>[
-        SplineSeries<ChartData, int>(
+        SplineSeries<MainChartData, int>(
             animationDuration: 500,
             splineType: SplineType.monotonic,
             markerSettings: MarkerSettings(
@@ -169,8 +287,8 @@ class PastWeekChart extends StatelessWidget {
             color: Colors.green.shade200,
             width: 10,
             dataSource: data,
-            xValueMapper: (ChartData data, _) => data.x,
-            yValueMapper: (ChartData data, _) => data.y),
+            xValueMapper: (MainChartData data, _) => data.x,
+            yValueMapper: (MainChartData data, _) => data.y),
       ],
       primaryXAxis: CategoryAxis(
           interval: 1,
@@ -190,7 +308,7 @@ class PastWeekChart extends StatelessWidget {
   }
 }
 
-ChartAxisLabel axis(AxisLabelRenderDetails details, List<ChartData> data) {
+ChartAxisLabel axis(AxisLabelRenderDetails details, List<MainChartData> data) {
   var value = int.parse(details.text);
   var day = DateFormat.EEEE()
       .format(DateTime.now().subtract(Duration(days: 7 - value)));
