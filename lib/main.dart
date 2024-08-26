@@ -5,6 +5,7 @@ import 'package:after_layout/after_layout.dart';
 import 'package:better_days_flutter/screens/intro.dart';
 import 'package:better_days_flutter/screens/settings.dart';
 import 'package:better_days_flutter/states/app_state.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:better_days_flutter/screens/history.dart';
 import 'package:better_days_flutter/screens/profile.dart';
@@ -20,6 +21,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // getDisplayMode();
+    trySetHFR();
+
     return ChangeNotifierProvider(
       create: (context) => AppState(),
       child: MaterialApp(
@@ -254,4 +258,23 @@ Future<void> _showDeletePrefsDialog(BuildContext context) async {
       );
     },
   );
+}
+
+void getDisplayMode() async {
+  var displayModes = await FlutterDisplayMode.supported;
+  var currentDisplayMode = await FlutterDisplayMode.active;
+
+  log("Supported modes: ");
+  for (var m in displayModes) {
+    log("${m.refreshRate}hz");
+  }
+  log("Current mode: ${currentDisplayMode.refreshRate}");
+}
+
+void trySetHFR() async {
+  try {
+    await FlutterDisplayMode.setHighRefreshRate();
+  } catch (e) {
+    log(e.toString());
+  }
 }

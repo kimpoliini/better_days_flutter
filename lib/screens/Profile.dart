@@ -89,24 +89,19 @@ class _ProfileState extends State<Profile> {
     if (!checkInfo(user)) return null;
 
     List<Widget> children = <Widget>[];
+    var rrb = RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0));
 
     children.add(const SizedBox(height: 8.0));
 
     ExpansionTile widget = ExpansionTile(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      collapsedShape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      // leading: SizedBox(width: 0.0),
+      shape: rrb,
+      collapsedShape: rrb,
       leading: const Text(
         "Additional information",
-        // "Show ${isExpanded ? "less" : "more"}",
         style: TextStyle(fontSize: 16),
       ),
-      // trailing: SizedBox(width: 0.0),
-      // iconColor: Colors.transparent,
       controlAffinity: ListTileControlAffinity.trailing,
       title: const Text(""),
-      // tilePadding: EdgeInsets.all(4.0),
       onExpansionChanged: (expanded) => setState(() {
         isExpanded = expanded;
         expansionIcon = expanded
