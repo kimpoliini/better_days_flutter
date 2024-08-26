@@ -8,6 +8,7 @@ class HistoryItem {
 
   DateTime? date;
   String? description;
+  bool isDescriptionHidden = false;
   double? score;
   List<HourScore>? scores;
 }

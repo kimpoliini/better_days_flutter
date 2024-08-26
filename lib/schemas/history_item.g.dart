@@ -27,13 +27,18 @@ const HistoryItemSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'score': PropertySchema(
+    r'isDescriptionHidden': PropertySchema(
       id: 2,
+      name: r'isDescriptionHidden',
+      type: IsarType.bool,
+    ),
+    r'score': PropertySchema(
+      id: 3,
       name: r'score',
       type: IsarType.double,
     ),
     r'scores': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'scores',
       type: IsarType.objectList,
       target: r'HourScore',
@@ -90,9 +95,10 @@ void _historyItemSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.date);
   writer.writeString(offsets[1], object.description);
-  writer.writeDouble(offsets[2], object.score);
+  writer.writeBool(offsets[2], object.isDescriptionHidden);
+  writer.writeDouble(offsets[3], object.score);
   writer.writeObjectList<HourScore>(
-    offsets[3],
+    offsets[4],
     allOffsets,
     HourScoreSchema.serialize,
     object.scores,
@@ -109,9 +115,10 @@ HistoryItem _historyItemDeserialize(
   object.date = reader.readDateTimeOrNull(offsets[0]);
   object.description = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.score = reader.readDoubleOrNull(offsets[2]);
+  object.isDescriptionHidden = reader.readBool(offsets[2]);
+  object.score = reader.readDoubleOrNull(offsets[3]);
   object.scores = reader.readObjectList<HourScore>(
-    offsets[3],
+    offsets[4],
     HourScoreSchema.deserialize,
     allOffsets,
     HourScore(),
@@ -131,8 +138,10 @@ P _historyItemDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 4:
       return (reader.readObjectList<HourScore>(
         offset,
         HourScoreSchema.deserialize,
@@ -514,6 +523,16 @@ extension HistoryItemQueryFilter
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QAfterFilterCondition>
+      isDescriptionHiddenEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDescriptionHidden',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QAfterFilterCondition> scoreIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -740,6 +759,20 @@ extension HistoryItemQuerySortBy
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
+      sortByIsDescriptionHidden() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDescriptionHidden', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
+      sortByIsDescriptionHiddenDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDescriptionHidden', Sort.desc);
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy> sortByScore() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'score', Sort.asc);
@@ -791,6 +824,20 @@ extension HistoryItemQuerySortThenBy
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
+      thenByIsDescriptionHidden() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDescriptionHidden', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
+      thenByIsDescriptionHiddenDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDescriptionHidden', Sort.desc);
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy> thenByScore() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'score', Sort.asc);
@@ -819,6 +866,13 @@ extension HistoryItemQueryWhereDistinct
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QDistinct>
+      distinctByIsDescriptionHidden() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDescriptionHidden');
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QDistinct> distinctByScore() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'score');
@@ -843,6 +897,13 @@ extension HistoryItemQueryProperty
   QueryBuilder<HistoryItem, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<HistoryItem, bool, QQueryOperations>
+      isDescriptionHiddenProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDescriptionHidden');
     });
   }
 

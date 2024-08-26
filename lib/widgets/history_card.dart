@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class _HistoryCardState extends State<HistoryCard> {
     var rrb = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0));
     double cardPadding = 16.0;
     bool hasNote = entry.description != null;
+    double noteBlur = isNoteHidden ? 4.0 : 0.0;
     Text textWidget = Text(hasNote ? entry.description! : "No description.",
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
@@ -69,19 +71,25 @@ class _HistoryCardState extends State<HistoryCard> {
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12.0),
                       child: textWidget),
-                  ExpansionTile(
-                    enabled: false,
-                    title: textWidget,
-                    dense: !hasNote,
-                    controller: controller,
-                    tilePadding: EdgeInsets.zero,
-                    iconColor: Colors.transparent,
-                    collapsedIconColor: Colors.transparent,
-                    childrenPadding:
-                        EdgeInsets.only(top: 0, bottom: cardPadding / 2),
-                    children: [
-                      Row(children: getButtonRow()),
-                    ],
+                  ClipRect(
+                    child: ExpansionTile(
+                      maintainState: true,
+                      enabled: false,
+                      title: BackdropFilter(
+                          filter: ImageFilter.blur(
+                              sigmaX: noteBlur, sigmaY: noteBlur),
+                          child: textWidget),
+                      dense: !hasNote,
+                      controller: controller,
+                      tilePadding: EdgeInsets.zero,
+                      iconColor: Colors.transparent,
+                      collapsedIconColor: Colors.transparent,
+                      childrenPadding:
+                          EdgeInsets.only(top: 0, bottom: cardPadding / 2),
+                      children: [
+                        Row(children: getButtonRow()),
+                      ],
+                    ),
                   ),
                 ]),
               ),
