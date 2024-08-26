@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 class HistoryCard extends StatefulWidget {
   const HistoryCard({super.key, required this.entry});
@@ -16,6 +15,7 @@ class HistoryCard extends StatefulWidget {
 class _HistoryCardState extends State<HistoryCard> {
   // const HistoryCard({super.key, required this.entry});
   bool isExpanded = false;
+  bool isNoteHidden = false;
   late HistoryEntry entry;
 
   final headerStyle =
@@ -29,6 +29,13 @@ class _HistoryCardState extends State<HistoryCard> {
     var rrb = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0));
     double cardPadding = 16.0;
     bool hasNote = entry.description != null;
+    Text textWidget = Text(hasNote ? entry.description! : "No description.",
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+            fontSize: hasNote ? 16.0 : 14.0,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic));
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -55,36 +62,28 @@ class _HistoryCardState extends State<HistoryCard> {
                 getDateText(),
                 style: headerStyle,
               ),
-              IgnorePointer(
-                ignoring: true,
-                child: ExpansionTile(
-                  title: Text(
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    hasNote ? entry.description! : "No description.",
-                    style: TextStyle(
-                        fontSize: hasNote ? 16.0 : 14.0,
-                        fontWeight: FontWeight.w300,
-                        fontStyle: FontStyle.italic),
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(disabledColor: Colors.transparent),
+                child: Stack(children: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: textWidget),
+                  ExpansionTile(
+                    enabled: false,
+                    title: textWidget,
+                    dense: !hasNote,
+                    controller: controller,
+                    tilePadding: EdgeInsets.zero,
+                    iconColor: Colors.transparent,
+                    collapsedIconColor: Colors.transparent,
+                    childrenPadding:
+                        EdgeInsets.only(top: 0, bottom: cardPadding / 2),
+                    children: [
+                      Row(children: getButtonRow()),
+                    ],
                   ),
-                  dense: !hasNote,
-                  controller: controller,
-                  tilePadding: EdgeInsets.zero,
-                  iconColor: Colors.transparent,
-                  collapsedIconColor: Colors.transparent,
-                  childrenPadding: EdgeInsets.only(
-                      top: cardPadding / 2, bottom: cardPadding),
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.visibility, color: Colors.green.shade300),
-                        Icon(Icons.edit, color: Colors.green.shade300),
-                        const Spacer(),
-                        Icon(Icons.delete, color: Colors.red.shade400),
-                      ],
-                    )
-                  ],
-                ),
+                ]),
               ),
             ],
           ),
@@ -127,6 +126,10 @@ class _HistoryCardState extends State<HistoryCard> {
     // );
   }
 
+  void toggleNoteHidden() => setState(() {
+        isNoteHidden = !isNoteHidden;
+      });
+
   String getDateText() {
     bool isThisYear = DateTime.now().year == entry.date.year;
     bool isThisMonth = DateTime.now().month == entry.date.month;
@@ -138,5 +141,50 @@ class _HistoryCardState extends State<HistoryCard> {
         : (isThisYear
             ? DateFormat.MMMEd().format(entry.date)
             : DateFormat.yMMMd().format(entry.date));
+  }
+
+  List<Widget> getButtonRow() {
+    Color green = Colors.green.shade300;
+    double iconSize = 24;
+    double containerSize = 36;
+
+    return [
+      SizedBox(
+        width: containerSize,
+        height: containerSize,
+        child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            iconSize: iconSize,
+            onPressed: () {
+              toggleNoteHidden();
+            },
+            icon: Icon(isNoteHidden ? Icons.visibility_off : Icons.visibility,
+                color: green)),
+      ),
+      SizedBox(
+        width: containerSize,
+        height: containerSize,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {},
+          icon: Icon(Icons.edit, color: green),
+          iconSize: iconSize,
+        ),
+      ),
+      const Spacer(),
+      SizedBox(
+        width: containerSize,
+        height: containerSize,
+        child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {},
+            icon: const Icon(Icons.delete),
+            color: Colors.red.shade400,
+            iconSize: iconSize),
+      )
+    ];
   }
 }
