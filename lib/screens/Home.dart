@@ -299,9 +299,8 @@ class PastWeekChart extends StatelessWidget {
     return SfCartesianChart(
       series: <CartesianSeries>[
         SplineSeries<MainChartData, int>(
-            cardinalSplineTension: 0.75,
             animationDuration: 0,
-            splineType: SplineType.cardinal,
+            splineType: SplineType.monotonic,
             markerSettings: MarkerSettings(
                 borderWidth: 0,
                 height: 20,
