@@ -8,7 +8,6 @@ import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:better_days_flutter/widgets/evaluate_day_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';

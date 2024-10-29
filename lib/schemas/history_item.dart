@@ -6,6 +6,7 @@ part 'history_item.g.dart';
 class HistoryItem {
   Id id = Isar.autoIncrement;
 
+  @Index()
   DateTime? date;
   String? description;
   bool isDescriptionHidden = false;

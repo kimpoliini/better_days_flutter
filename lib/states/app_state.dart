@@ -140,3 +140,13 @@ Future<void> deleteSharedPreferences() async {
   await prefs.clear();
   log("Cleared SharedPreferences");
 }
+
+Future<void> deleteHistoryItem(HistoryEntry entry) async {
+  var db = await openHistoryDatabase();
+
+  await db.writeTxn(() async {
+    bool wasDeleted =
+        await db.historyItems.where().dateEqualTo(entry.date).deleteFirst();
+    if (wasDeleted) log("deleted entry at date ${entry.date}");
+  });
+}

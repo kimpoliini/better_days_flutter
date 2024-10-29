@@ -2,8 +2,11 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:better_days_flutter/models/history_entry.dart';
+import 'package:better_days_flutter/states/app_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class HistoryCard extends StatefulWidget {
   const HistoryCard({super.key, required this.entry});
@@ -188,7 +191,9 @@ class _HistoryCardState extends State<HistoryCard> {
         child: IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: () {},
+            onPressed: () {
+              _showDeleteEntryDialog(context, entry);
+            },
             icon: const Icon(Icons.delete),
             color: Colors.red.shade400,
             iconSize: iconSize),
@@ -196,3 +201,45 @@ class _HistoryCardState extends State<HistoryCard> {
     ];
   }
 }
+
+Future<void> _showDeleteEntryDialog(
+    BuildContext context, HistoryEntry entry) async {
+  String date = DateFormat.MMMMEEEEd().format(entry.date);
+
+  return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Remove entry?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Remove the entry on $date?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+                child: const Text('CANCEL'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                }),
+            TextButton(
+              child:
+                  Text('REMOVE', style: TextStyle(color: Colors.red.shade400)),
+              onPressed: () async {
+                await deleteHistoryItem(entry);
+
+                if (context.mounted) {
+                  Provider.of<AppState>(context, listen: false)
+                      .updateHistoryEntries();
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      });
+}
+
+void deleteEntry(HistoryEntry entry) {}
