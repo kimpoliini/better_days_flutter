@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:better_days_flutter/models/history_entry.dart';
+import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -181,7 +182,9 @@ class _HistoryCardState extends State<HistoryCard> {
         child: IconButton(
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
-          onPressed: () {},
+          onPressed: () {
+            editEntry();
+          },
           icon: Icon(Icons.edit, color: green),
           iconSize: iconSize,
         ),
@@ -210,6 +213,14 @@ class _HistoryCardState extends State<HistoryCard> {
         updateHistoryItem(entry, newEntry);
         isNoteHidden = !isNoteHidden;
       });
+
+  void editEntry() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                EvaluateDay(mode: DayMode.edit, entryToEdit: entry)));
+  }
 }
 
 Future<void> _showDeleteEntryDialog(

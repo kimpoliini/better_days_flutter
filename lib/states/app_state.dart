@@ -97,6 +97,20 @@ class AppState extends ChangeNotifier {
   }
 }
 
+Future<void> addHistoryItem(HistoryEntry entry) async {
+  Isar db = await openHistoryDatabase();
+
+  final newEntry = HistoryItem()
+    ..date = entry.date
+    ..description = entry.description
+    ..isDescriptionHidden = entry.isDescriptionHidden
+    ..score = entry.score;
+
+  await db.writeTxn(() async {
+    await db.historyItems.put(newEntry);
+  });
+}
+
 Future<HistoryItem?> getMostRecentHistoryItem() async {
   var db = await openHistoryDatabase();
 

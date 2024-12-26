@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'dart:developer' as dev;
+import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/schemas/history_item.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:better_days_flutter/widgets/evaluate_day_button.dart';
@@ -11,7 +13,7 @@ import 'package:isar/isar.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-enum DayMode { today, otherDay }
+enum DayMode { today, otherDay, edit }
 
 class DayScoreEntry {
   DayScoreEntry(this.x, this.y);
@@ -21,8 +23,9 @@ class DayScoreEntry {
 }
 
 class EvaluateDay extends StatefulWidget {
-  const EvaluateDay({super.key, this.mode = DayMode.today});
+  const EvaluateDay({super.key, this.mode = DayMode.today, this.entryToEdit});
   final DayMode mode;
+  final HistoryEntry? entryToEdit;
 
   @override
   State<StatefulWidget> createState() => _EvaluateDayState();
@@ -46,6 +49,9 @@ class _EvaluateDayState extends State<EvaluateDay> {
     DayScoreEntry(24, 5),
   ];
 
+  String modeText = "";
+  bool isToday = false;
+
   void _toggleMode() {
     setState(() {
       isSimpleMode = !isSimpleMode;
@@ -61,7 +67,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
   void _addPoint(DayScoreEntry entry) {
     setState(() {
       data.add(entry);
-
       data.sort(
         (a, b) => a.x.compareTo(b.x),
       );
@@ -96,17 +101,30 @@ class _EvaluateDayState extends State<EvaluateDay> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    String modeText =
-        widget.mode == DayMode.today ? "Evaluate today" : "Evaluate day";
+  void initState() {
+    super.initState();
+
+    modeText = switch (widget.mode) {
+      DayMode.today => "Evaluate today",
+      DayMode.otherDay => "Evaluate day",
+      DayMode.edit => "Edit day",
+    };
+
     bool isToday = widget.mode == DayMode.today;
     if (isToday) {
       DateTime now = DateTime.now();
       DateTime today = DateTime.parse(DateFormat("yyyy-MM-dd").format(now));
 
       _setDate(today);
+    } else if (widget.mode == DayMode.edit) {
+      _setDate(widget.entryToEdit!.date);
+      note = widget.entryToEdit!.description ?? "";
+      currentSliderValue = widget.entryToEdit!.score ?? 5;
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     var appState = context.watch<AppState>();
 
     return Scaffold(
@@ -119,11 +137,25 @@ class _EvaluateDayState extends State<EvaluateDay> {
             icon: Icons.check,
             onTap: selectedDate != null
                 ? () async {
-                    await addDbEntry();
+                    //Creates a HistoryEntry from available information
+                    HistoryEntry entry = HistoryEntry(
+                        date: selectedDate!,
+                        description: note,
+                        isDescriptionHidden: widget.mode == DayMode.edit
+                            ? widget.entryToEdit!.isDescriptionHidden
+                            : false,
+                        score: isSimpleMode
+                            ? currentSliderValue
+                            : averagePointScore(data));
+
+                    if (widget.mode == DayMode.edit) {
+                      await updateHistoryItem(widget.entryToEdit!, entry);
+                    } else {
+                      await addHistoryItem(entry);
+                    }
 
                     appState.updateHistoryEntries();
-                    // if (context.mounted)
-                    Navigator.pop(context);
+                    if (context.mounted) Navigator.pop(context);
                   }
                 : null),
       ),
@@ -151,7 +183,7 @@ class _EvaluateDayState extends State<EvaluateDay> {
                     onTap: _toggleMode,
                   ),
                   RoundedButton(
-                    enabled: !isToday,
+                    enabled: !isToday && widget.mode != DayMode.edit,
                     text: isToday
                         ? "Evaluating today"
                         : selectedDate != null
@@ -212,7 +244,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                         const SizedBox(
                           height: 16,
                         ),
-                        TextField(
+                        TextFormField(
+                          initialValue: note,
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.sentences,
                           autocorrect: true,
@@ -466,19 +499,6 @@ class _EvaluateDayState extends State<EvaluateDay> {
             interval: 2,
           )),
     ]);
-  }
-
-  Future<void> addDbEntry() async {
-    Isar db = await openHistoryDatabase();
-
-    final newEntry = HistoryItem()
-      ..date = selectedDate!
-      ..description = note.isEmpty ? null : note
-      ..score = isSimpleMode ? currentSliderValue : averagePointScore(data);
-
-    await db.writeTxn(() async {
-      await db.historyItems.put(newEntry);
-    });
   }
 }
 
