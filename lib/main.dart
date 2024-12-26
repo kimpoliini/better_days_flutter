@@ -177,7 +177,15 @@ List<Widget>? getCurrentTabActions(BuildContext context, int index) {
         ),
         IconButton(
             onPressed: () => {_showDeletePrefsDialog(context)},
-            icon: const Icon(Icons.delete_forever))
+            icon: const Icon(Icons.delete_forever)),
+        // IconButton(
+        //     onPressed: () => {
+        //           Navigator.push(
+        //               context,
+        //               MaterialPageRoute(
+        //                   builder: (context) => const Bookmarks()))
+        //         },
+        //     icon: const Icon(Icons.bookmarks)),
       ];
       break;
     default:

@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+import 'dart:math';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:better_days_flutter/widgets/history_card.dart';
@@ -5,17 +7,39 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class History extends StatelessWidget {
+class History extends StatefulWidget {
   const History({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _HistoryState();
+}
+
+class _HistoryState extends State<History> {
+  // const History({super.key});
+  bool showBookmarks = false;
+
+  void _setShowBookmarks(bool value) {
+    setState(() {
+      showBookmarks = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     var state = context.watch<AppState>();
     var sortedEntries = state.historyEntries;
     sortedEntries.sort((a, b) => b.date.compareTo(a.date));
+    var currentEntries = [];
 
-    var items = List<ListItem>.generate(sortedEntries.length, (i) {
-      return EntryItem(sortedEntries[i]);
+    if (showBookmarks) {
+      currentEntries =
+          sortedEntries.where((element) => element.isBookmarked).toList();
+    } else {
+      currentEntries = sortedEntries;
+    }
+
+    var items = List<ListItem>.generate(currentEntries.length, (i) {
+      return EntryItem(currentEntries[i]);
     });
 
     var currentMonthOffset = 0;
@@ -47,12 +71,36 @@ class History extends StatelessWidget {
     }
 
     return state.historyEntries.isNotEmpty
-        ? ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return item.buildTitle(context);
-            },
+        ? SingleChildScrollView(
+            physics: const ScrollPhysics(),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.bookmarks,
+                        color: Colors.green.shade300,
+                      ),
+                      Checkbox(
+                          value: showBookmarks,
+                          onChanged: (value) => _setShowBookmarks(value!)),
+                      const Text("Show bookmarks"),
+                    ],
+                  ),
+                ),
+                ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return item.buildTitle(context);
+                  },
+                ),
+              ],
+            ),
           )
         : const Center(child: Text("No entries yet"));
   }
