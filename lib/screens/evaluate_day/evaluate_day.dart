@@ -73,6 +73,15 @@ class _EvaluateDayState extends State<EvaluateDay> {
     });
   }
 
+  void _addPoints(List<DayScoreEntry> entries) {
+    setState(() {
+      data.addAll(entries);
+      data.sort(
+        (a, b) => a.x.compareTo(b.x),
+      );
+    });
+  }
+
   void _updatePoint(int index, double newValue, {Color color = Colors.green}) {
     setState(() {
       data[index].y = newValue;
@@ -120,6 +129,17 @@ class _EvaluateDayState extends State<EvaluateDay> {
       _setDate(widget.entryToEdit!.date);
       note = widget.entryToEdit!.description ?? "";
       currentSliderValue = widget.entryToEdit!.score ?? 5;
+
+      if (widget.entryToEdit!.scores != null) {
+        var scores = widget.entryToEdit!.scores!
+            .map((e) => DayScoreEntry(e.hour!, e.score!))
+            .toList();
+
+        scores.removeAt(0);
+        scores.removeLast();
+
+        _addPoints(scores);
+      }
     }
   }
 
@@ -138,6 +158,12 @@ class _EvaluateDayState extends State<EvaluateDay> {
             onTap: selectedDate != null
                 ? () async {
                     //Creates a HistoryEntry from available information
+                    List<HourScore> scores = data
+                        .map((e) => HourScore()
+                          ..hour = e.x
+                          ..score = e.y)
+                        .toList();
+
                     HistoryEntry entry = HistoryEntry(
                         date: selectedDate!,
                         description: note,
@@ -146,7 +172,8 @@ class _EvaluateDayState extends State<EvaluateDay> {
                             : false,
                         score: isSimpleMode
                             ? currentSliderValue
-                            : averagePointScore(data));
+                            : averagePointScore(data),
+                        scores: isSimpleMode ? null : scores);
 
                     if (widget.mode == DayMode.edit) {
                       await updateHistoryItem(widget.entryToEdit!, entry);

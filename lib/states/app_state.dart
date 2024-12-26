@@ -38,7 +38,9 @@ class AppState extends ChangeNotifier {
             date: e.date!,
             description: e.description,
             isDescriptionHidden: e.isDescriptionHidden,
-            score: e.score))
+            isBookmarked: e.isBookmarked,
+            score: e.score,
+            scores: e.scores))
         .toList();
     // log("updated entries");
     // for (var e in newItems) {
@@ -100,14 +102,15 @@ class AppState extends ChangeNotifier {
 Future<void> addHistoryItem(HistoryEntry entry) async {
   Isar db = await openHistoryDatabase();
 
-  final newEntry = HistoryItem()
+  final newItem = HistoryItem()
     ..date = entry.date
     ..description = entry.description
     ..isDescriptionHidden = entry.isDescriptionHidden
-    ..score = entry.score;
+    ..score = entry.score
+    ..scores = entry.scores;
 
   await db.writeTxn(() async {
-    await db.historyItems.put(newEntry);
+    await db.historyItems.put(newItem);
   });
 }
 
@@ -182,7 +185,8 @@ Future<void> updateHistoryItem(
       ..description = newEntry.description
       ..isDescriptionHidden = newEntry.isDescriptionHidden
       ..isBookmarked = newEntry.isBookmarked
-      ..score = newEntry.score;
+      ..score = newEntry.score
+      ..scores = newEntry.scores;
     await db.historyItems.put(item);
 
     log("updated entry at date ${entry.date}");

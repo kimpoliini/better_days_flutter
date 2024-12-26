@@ -6,7 +6,6 @@ import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 import 'package:provider/provider.dart';
 
 class HistoryCard extends StatefulWidget {
@@ -41,16 +40,19 @@ class _HistoryCardState extends State<HistoryCard> {
     RoundedRectangleBorder rrb =
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0));
     double cardPadding = 16.0;
-    bool hasNote = entry.description != null;
+    bool hasNote = entry.description != "";
     double noteBlur = isNoteHidden ? 4.0 : 0.0;
 
-    Text textWidget = Text(hasNote ? entry.description! : "No description.",
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-            fontSize: hasNote ? 16.0 : 14.0,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic));
+    var textWidget = Padding(
+      padding: const EdgeInsets.only(left: 6.0),
+      child: Text(hasNote ? entry.description! : "No description.",
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+              fontSize: hasNote ? 16.0 : 14.0,
+              fontWeight: FontWeight.w300,
+              fontStyle: FontStyle.italic)),
+    );
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -213,8 +215,9 @@ class _HistoryCardState extends State<HistoryCard> {
         child: IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: () {
-              _showDeleteEntryDialog(context, entry);
+            onPressed: () async {
+              await _showDeleteEntryDialog(context, entry);
+              controller.collapse();
             },
             icon: const Icon(Icons.delete),
             color: Colors.red.shade400,

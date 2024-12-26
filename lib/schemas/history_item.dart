@@ -15,7 +15,6 @@ class HistoryItem {
   List<HourScore>? scores;
 }
 
-@embedded
 class HourScore {
   int? hour;
   double? score;
