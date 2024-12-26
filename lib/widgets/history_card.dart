@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:better_days_flutter/models/history_entry.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -30,10 +29,17 @@ class _HistoryCardState extends State<HistoryCard> {
   @override
   Widget build(BuildContext context) {
     entry = widget.entry;
-    var rrb = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0));
+
+    setState(() {
+      isNoteHidden = entry.isDescriptionHidden;
+    });
+
+    RoundedRectangleBorder rrb =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0));
     double cardPadding = 16.0;
     bool hasNote = entry.description != null;
     double noteBlur = isNoteHidden ? 4.0 : 0.0;
+
     Text textWidget = Text(hasNote ? entry.description! : "No description.",
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
@@ -137,10 +143,6 @@ class _HistoryCardState extends State<HistoryCard> {
     // );
   }
 
-  void toggleNoteHidden() => setState(() {
-        isNoteHidden = !isNoteHidden;
-      });
-
   String getDateText() {
     bool isThisYear = DateTime.now().year == entry.date.year;
     bool isThisMonth = DateTime.now().month == entry.date.month;
@@ -200,6 +202,14 @@ class _HistoryCardState extends State<HistoryCard> {
       )
     ];
   }
+
+  void toggleNoteHidden() => setState(() {
+        HistoryEntry newEntry = entry;
+        newEntry.isDescriptionHidden = !entry.isDescriptionHidden;
+
+        updateHistoryItem(entry, newEntry);
+        isNoteHidden = !isNoteHidden;
+      });
 }
 
 Future<void> _showDeleteEntryDialog(
@@ -241,5 +251,3 @@ Future<void> _showDeleteEntryDialog(
         );
       });
 }
-
-void deleteEntry(HistoryEntry entry) {}

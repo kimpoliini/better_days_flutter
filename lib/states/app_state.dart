@@ -35,7 +35,10 @@ class AppState extends ChangeNotifier {
 
     historyEntries = newItems
         .map((e) => HistoryEntry(
-            date: e.date!, description: e.description, score: e.score))
+            date: e.date!,
+            description: e.description,
+            isDescriptionHidden: e.isDescriptionHidden,
+            score: e.score))
         .toList();
     // log("updated entries");
     // for (var e in newItems) {
@@ -148,5 +151,25 @@ Future<void> deleteHistoryItem(HistoryEntry entry) async {
     bool wasDeleted =
         await db.historyItems.where().dateEqualTo(entry.date).deleteFirst();
     if (wasDeleted) log("deleted entry at date ${entry.date}");
+  });
+}
+
+Future<void> updateHistoryItem(
+    HistoryEntry entry, HistoryEntry newEntry) async {
+  var db = await openHistoryDatabase();
+
+  await db.writeTxn(() async {
+    var item =
+        await db.historyItems.where().dateEqualTo(entry.date).findFirst();
+
+    item = HistoryItem() //Same date and id as the original entry
+      ..id = item!.id
+      ..date = entry.date
+      ..description = newEntry.description
+      ..score = newEntry.score
+      ..isDescriptionHidden = newEntry.isDescriptionHidden;
+    await db.historyItems.put(item);
+
+    log("updated entry at date ${entry.date}");
   });
 }
