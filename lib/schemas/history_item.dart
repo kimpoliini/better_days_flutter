@@ -10,6 +10,7 @@ class HistoryItem {
   DateTime? date;
   String? description;
   bool isDescriptionHidden = false;
+  bool isBookmarked = false;
   double? score;
   List<HourScore>? scores;
 }

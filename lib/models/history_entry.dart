@@ -1,12 +1,14 @@
 class HistoryEntry {
   DateTime date;
   String? description;
-  bool isDescriptionHidden = false;
+  bool isDescriptionHidden;
+  bool isBookmarked;
   double? score;
 
   HistoryEntry(
       {required this.date,
       this.description,
-      required this.isDescriptionHidden,
+      this.isDescriptionHidden = false,
+      this.isBookmarked = false,
       this.score});
 }

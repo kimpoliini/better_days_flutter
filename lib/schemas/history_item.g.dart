@@ -27,18 +27,23 @@ const HistoryItemSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'isDescriptionHidden': PropertySchema(
+    r'isBookmarked': PropertySchema(
       id: 2,
+      name: r'isBookmarked',
+      type: IsarType.bool,
+    ),
+    r'isDescriptionHidden': PropertySchema(
+      id: 3,
       name: r'isDescriptionHidden',
       type: IsarType.bool,
     ),
     r'score': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'score',
       type: IsarType.double,
     ),
     r'scores': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'scores',
       type: IsarType.objectList,
       target: r'HourScore',
@@ -109,10 +114,11 @@ void _historyItemSerialize(
 ) {
   writer.writeDateTime(offsets[0], object.date);
   writer.writeString(offsets[1], object.description);
-  writer.writeBool(offsets[2], object.isDescriptionHidden);
-  writer.writeDouble(offsets[3], object.score);
+  writer.writeBool(offsets[2], object.isBookmarked);
+  writer.writeBool(offsets[3], object.isDescriptionHidden);
+  writer.writeDouble(offsets[4], object.score);
   writer.writeObjectList<HourScore>(
-    offsets[4],
+    offsets[5],
     allOffsets,
     HourScoreSchema.serialize,
     object.scores,
@@ -129,10 +135,11 @@ HistoryItem _historyItemDeserialize(
   object.date = reader.readDateTimeOrNull(offsets[0]);
   object.description = reader.readStringOrNull(offsets[1]);
   object.id = id;
-  object.isDescriptionHidden = reader.readBool(offsets[2]);
-  object.score = reader.readDoubleOrNull(offsets[3]);
+  object.isBookmarked = reader.readBool(offsets[2]);
+  object.isDescriptionHidden = reader.readBool(offsets[3]);
+  object.score = reader.readDoubleOrNull(offsets[4]);
   object.scores = reader.readObjectList<HourScore>(
-    offsets[4],
+    offsets[5],
     HourScoreSchema.deserialize,
     allOffsets,
     HourScore(),
@@ -154,8 +161,10 @@ P _historyItemDeserializeProp<P>(
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 4:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 5:
       return (reader.readObjectList<HourScore>(
         offset,
         HourScoreSchema.deserialize,
@@ -656,6 +665,16 @@ extension HistoryItemQueryFilter
   }
 
   QueryBuilder<HistoryItem, HistoryItem, QAfterFilterCondition>
+      isBookmarkedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isBookmarked',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<HistoryItem, HistoryItem, QAfterFilterCondition>
       isDescriptionHiddenEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -891,6 +910,19 @@ extension HistoryItemQuerySortBy
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy> sortByIsBookmarked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBookmarked', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
+      sortByIsBookmarkedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBookmarked', Sort.desc);
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
       sortByIsDescriptionHidden() {
     return QueryBuilder.apply(this, (query) {
@@ -956,6 +988,19 @@ extension HistoryItemQuerySortThenBy
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy> thenByIsBookmarked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBookmarked', Sort.asc);
+    });
+  }
+
+  QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
+      thenByIsBookmarkedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBookmarked', Sort.desc);
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QAfterSortBy>
       thenByIsDescriptionHidden() {
     return QueryBuilder.apply(this, (query) {
@@ -998,6 +1043,12 @@ extension HistoryItemQueryWhereDistinct
     });
   }
 
+  QueryBuilder<HistoryItem, HistoryItem, QDistinct> distinctByIsBookmarked() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isBookmarked');
+    });
+  }
+
   QueryBuilder<HistoryItem, HistoryItem, QDistinct>
       distinctByIsDescriptionHidden() {
     return QueryBuilder.apply(this, (query) {
@@ -1029,6 +1080,12 @@ extension HistoryItemQueryProperty
   QueryBuilder<HistoryItem, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<HistoryItem, bool, QQueryOperations> isBookmarkedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isBookmarked');
     });
   }
 

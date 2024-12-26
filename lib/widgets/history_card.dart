@@ -6,6 +6,7 @@ import 'package:better_days_flutter/screens/evaluate_day/evaluate_day.dart';
 import 'package:better_days_flutter/states/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 import 'package:provider/provider.dart';
 
 class HistoryCard extends StatefulWidget {
@@ -20,6 +21,7 @@ class _HistoryCardState extends State<HistoryCard> {
   // const HistoryCard({super.key, required this.entry});
   bool isExpanded = false;
   bool isNoteHidden = false;
+  bool isBookmarked = false;
   late HistoryEntry entry;
 
   final headerStyle =
@@ -33,6 +35,7 @@ class _HistoryCardState extends State<HistoryCard> {
 
     setState(() {
       isNoteHidden = entry.isDescriptionHidden;
+      isBookmarked = entry.isBookmarked;
     });
 
     RoundedRectangleBorder rrb =
@@ -189,6 +192,20 @@ class _HistoryCardState extends State<HistoryCard> {
           iconSize: iconSize,
         ),
       ),
+      SizedBox(
+        width: containerSize,
+        height: containerSize,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            toggleBookmark();
+          },
+          icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: green),
+          iconSize: iconSize,
+        ),
+      ),
       const Spacer(),
       SizedBox(
         width: containerSize,
@@ -221,6 +238,14 @@ class _HistoryCardState extends State<HistoryCard> {
             builder: (context) =>
                 EvaluateDay(mode: DayMode.edit, entryToEdit: entry)));
   }
+
+  void toggleBookmark() => setState(() {
+        HistoryEntry newEntry = entry;
+        newEntry.isBookmarked = !entry.isBookmarked;
+
+        updateHistoryItem(entry, newEntry);
+        isBookmarked = !isBookmarked;
+      });
 }
 
 Future<void> _showDeleteEntryDialog(

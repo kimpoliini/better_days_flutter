@@ -180,8 +180,9 @@ Future<void> updateHistoryItem(
       ..id = item!.id
       ..date = entry.date
       ..description = newEntry.description
-      ..score = newEntry.score
-      ..isDescriptionHidden = newEntry.isDescriptionHidden;
+      ..isDescriptionHidden = newEntry.isDescriptionHidden
+      ..isBookmarked = newEntry.isBookmarked
+      ..score = newEntry.score;
     await db.historyItems.put(item);
 
     log("updated entry at date ${entry.date}");
